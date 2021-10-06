@@ -1,8 +1,14 @@
 main(){
-    x = 5*3;
-    if (x >= 7){
-        y = "a";
+    Int x = 5+0b0111;
+    if (x >= 7 || x != 4){
+        String y = 'a';
     }else{
-        y = "b" + "c";
+        String y = "b" + "c";
+    }
+    Int z = 2;
+    while (!(z > 1 && z<1) || (z==8)){
+        z = z + x;
+        Int a = x / z;
+        Int b = x * y;
     }
 }

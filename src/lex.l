@@ -4,12 +4,13 @@
 
 int string_pos = 1;
 enum token{
-    MAIN = 1 , IF = 2 , ELSE = 3 , WHILE = 4 , INT_TYPE = 5 , STRING_TYPE = 6 , VAR = 7 , SEP = 8 , INT = 9 , BIN = 10 ,
-    STRING = 11 , PLUS = 12 , MINUS = 13 , MUL = 14 , DIV = 15 , LP = 16 , RP = 17 , LB = 18 , RB = 19 , XOR = 20 ,
-    ASSIGN = 21 , EQ = 22 , NEQ = 23 , LT = 24 , LE = 25 , GT = 26 , GE = 27 , NOT = 28 , AND = 29 , OR = 30
+   MAIN = 1 , IF = 2 , ELSE = 3 , WHILE = 4 , INT_TYPE = 5 , BOOL_TYPE = 6 , STRING_TYPE = 7 , VAR = 8 , SEP = 9 ,
+   COMMENT = 10 , INT = 11 , BIN = 12 , TRUE_VAL = 13 , FALSE_VAL = 14 , STRING = 15 , PLUS = 16 , MINUS = 17 ,
+   MUL = 18 , DIV = 19 , LP = 20 , RP = 21 , LB = 22 , RB = 23 , XOR = 24 , ASSIGN = 25 , EQ = 26 , NEQ = 27 , LT = 28 ,
+   LE = 29 , GT = 30 , GE = 31 , NOT = 32 , AND = 33 , OR = 34
 };
 
-//TODO: add transfrom BIN to INf and check numbers size
+//TODO: add transfrom BIN to INT and check numbers size
 %}
 
 %option yylineno
@@ -20,9 +21,13 @@ IF if
 ELSE else
 WHILE while
 INT_TYPE Int
+BOOL_TYPE Bool
 STRING_TYPE String
+TRUE_VAL True
+FALSE_VAL False
 VAR [a-z][a-zA-Z0-9_]*
 SEP ;
+COMMENT \/\/.*
 INT  [0-9]+
 BIN 0b[0-1]+
 STRING \'[^\'\"]*\'|\"[^\'\"]*\"
@@ -53,11 +58,14 @@ OR "||"
 {ELSE}          {string_pos+=strlen(yytext); return ELSE; }
 {WHILE}          {string_pos+=strlen(yytext); return WHILE; }
 {INT_TYPE}          {string_pos+=strlen(yytext); return INT_TYPE; }
+{BOOL_TYPE}          {string_pos+=strlen(yytext); return BOOL_TYPE; }
 {STRING_TYPE}          {string_pos+=strlen(yytext); return STRING_TYPE; }
 {VAR}          {string_pos+=strlen(yytext); return VAR; }
 {SEP}          {string_pos+=strlen(yytext); return SEP; }
 {INT}          {string_pos+=strlen(yytext); return INT; }
 {BIN}          {string_pos+=strlen(yytext); return BIN; }
+{TRUE_VAL}          {string_pos+=strlen(yytext); return TRUE_VAL; }
+{FALSE_VAL}          {string_pos+=strlen(yytext); return FALSE_VAL; }
 {STRING}          {string_pos+=strlen(yytext); return STRING; }
 {PLUS}          {string_pos+=strlen(yytext); return PLUS; }
 {MINUS}          {string_pos+=strlen(yytext); return MINUS; }
@@ -79,7 +87,7 @@ OR "||"
 {AND}          {string_pos+=strlen(yytext); return AND; }
 {OR}          {string_pos+=strlen(yytext); return OR; }
 
-
+{COMMENT}         {string_pos+=strlen(yytext);}
 [ \t\r]           {string_pos++;}
 [\n]              {string_pos = 1;}
 

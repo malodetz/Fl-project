@@ -5,10 +5,13 @@ main(){
     }else{
         String y = "b" + "c";
     }
+
     Int z = 2;
-    while (!(z > 1 && z<1) || (z==8)){
+    Bool flag = True;
+    while (flag != False){
         z = z + x;
         Int a = x / z;
         Int b = x * y;
+        flag = !(z > 1 && z<1) || (z==8); //Update flag
     }
 }

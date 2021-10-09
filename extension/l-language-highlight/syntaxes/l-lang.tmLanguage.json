@@ -1,0 +1,114 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "L-language",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#types"
+		},
+		{
+			"include": "#comment"
+		},
+		{
+			"include": "#function"
+		},
+		{
+			"include": "#strings_double"
+		},
+		{
+			"include": "#strings_single"
+		},
+		{
+			"include": "#bin_integer"
+		},
+		{
+			"include": "#decimal_integer"
+		},
+		{
+			"include": "#bool_literal"
+		},
+		{
+			"include": "#variables"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control",
+				"match": "\\b(if|else|while|skip)\\b"
+			}]
+		},
+		"types": {
+			"patterns": [{
+				"name": "entity.name.type",
+				"match": "\\b(Bool|Int|String)\\b"
+			}]
+		},
+		"comment": {
+			"name": "comment.line.double-slash",
+			"begin": "//",
+			"end": "\n",
+			"patterns": [
+				{
+					"name": "comment.line",
+					"match": "\\\\."
+				}
+			]
+		},
+		"function": {
+			"patterns": [{
+				"name": "entity.name.function",
+				"match": "\\bmain()"
+			}]
+		},
+		"strings_double": {
+			"name": "string.quoted.double",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape",
+					"match": "\\\\."
+				}
+			]
+		},
+		"strings_single": {
+			"name": "string.quoted.double",
+			"begin": "'",
+			"end": "'",
+			"patterns": [
+				{
+					"name": "constant.character.escape",
+					"match": "\\\\."
+				}
+			]
+		},
+		"bin_integer": {
+			"patterns": [{
+				"name": "constant.numeric",
+				"match": "\\b-?0b(1|0)+(?=(==|<|>|\\*|\\+|-|\\^|\n| |\\)|;))"
+			}]
+		},
+		"decimal_integer": {
+			"patterns": [{
+				"name": "constant.numeric",
+				"match": "\\b-?[0-9]+\\b"
+			}]
+		},
+		"bool_literal": {
+			"patterns": [{
+				"name": "constant.other",
+				"match": "\\b(True|False)\\b"
+			}]
+		},
+		"variables" : {
+			"patterns": [{
+				"name": "variable.name",
+				"match": "\\b[a-z]([a-z]|[A-Z]|_)*\\b"
+			}]
+		}
+	},
+	"scopeName": "source.lang"
+}

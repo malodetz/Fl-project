@@ -1,0 +1,107 @@
+%{
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <cassert>
+
+using namespace std;
+
+int yylex();
+
+int yyerror(const char *p) {
+    cerr << "Error! Unexpected token " << p << endl;
+    return 1;
+}
+
+%}
+
+%union {
+    std::string *word;
+    char sym;
+    int num;
+    bool boolean;
+};
+
+%token <word> MAIN IF ELSE WHILE SKIP
+%token <word> INT_TYPE BOOL_TYPE STRING_TYPE
+%token <word> VAR
+%token <word> STRING
+%token <sym> SEP LP RP LB RB ASSIGN
+%token <sym> PLUS MINUS MUL DIV POW
+%token <word> EQ NEQ LT LE GT GE NOT AND OR
+%token <num> INT
+%token <boolean> TRUE_VAL FALSE_VAL
+
+%left OR
+%left AND
+%left NOT
+%left EQ NEQ LT LE GT GE
+%left PLUS MINUS
+%left MUL DIV
+%left POW
+
+%%
+start: MAIN LP RP code_block  {cout << "Main: " << endl;}
+
+code_block: LB statements_seq RB {}
+
+statements_seq: statements_seq statement {}
+| statement {}
+
+statement: declaration {}
+| assignment {}
+| skip {}
+| if_statement {}
+| while_statement {}
+;
+
+skip: SKIP SEP {}
+
+declaration: type VAR ASSIGN EXPR SEP {cout << *$2 << endl;}
+
+type: INT_TYPE | BOOL_TYPE | STRING_TYPE
+
+assignment: VAR ASSIGN EXPR SEP {cout << *$1 << endl;}
+
+if_statement: if_stmt optional_else {}
+
+if_stmt: IF LP EXPR RP code_block {}
+
+optional_else: ELSE code_block {}
+| {}
+;
+
+while_statement: WHILE LP EXPR RP code_block {};
+
+EXPR : CONST {}
+| VAR {cout << *$1 << endl;}
+| LP EXPR RP {}
+| EXPR PLUS  EXPR {}
+| EXPR MINUS EXPR {}
+| EXPR MUL   EXPR {}
+| EXPR DIV   EXPR {}
+| EXPR POW   EXPR {}
+| NOT EXPR {}
+| EXPR AND EXPR {}
+| EXPR OR EXPR {}
+| EXPR EQ EXPR {}
+| EXPR NEQ EXPR {}
+| EXPR LE EXPR {}
+| EXPR LT EXPR {}
+| EXPR GE EXPR {}
+| EXPR GT EXPR {}
+;
+
+CONST: INT | STRING | TRUE_VAL | FALSE_VAL {}
+
+%%
+
+
+int main(int argc, char* argv[])
+{
+    freopen(argv[1], "r", stdin);
+    yyparse();
+    fclose(stdin);
+
+    return 0;
+}

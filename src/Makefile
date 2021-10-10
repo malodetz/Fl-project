@@ -7,7 +7,7 @@ LIBS = `$(LLVMCONFIG) --libs`
 
 BUILDDIR = build
 
-OBJS = $(BUILDDIR)/parser.o $(BUILDDIR)/lexer.o 
+OBJS = $(BUILDDIR)/parser.o $(BUILDDIR)/lexer.o  ${BUILDDIR}/node.o
 
 all: $(BUILDDIR)/parser
 

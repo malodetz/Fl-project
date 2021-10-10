@@ -14,4 +14,7 @@ main(){
         Int b = x * y;
         flag = !(z > 1 && z<1) || (z==8); //Update flag
     }
+    while (True){
+        skip;
+    }
 }

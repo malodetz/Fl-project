@@ -7,7 +7,7 @@ enum token{
    MAIN = 1 , IF = 2 , ELSE = 3 , WHILE = 4 , INT_TYPE = 5 , BOOL_TYPE = 6 , STRING_TYPE = 7 , VAR = 8 , SEP = 9 ,
    COMMENT = 10 , INT = 11 , BIN = 12 , TRUE_VAL = 13 , FALSE_VAL = 14 , STRING = 15 , PLUS = 16 , MINUS = 17 ,
    MUL = 18 , DIV = 19 , LP = 20 , RP = 21 , LB = 22 , RB = 23 , XOR = 24 , ASSIGN = 25 , EQ = 26 , NEQ = 27 , LT = 28 ,
-   LE = 29 , GT = 30 , GE = 31 , NOT = 32 , AND = 33 , OR = 34
+   LE = 29 , GT = 30 , GE = 31 , NOT = 32 , AND = 33 , OR = 34, SKIP = 35
 };
 
 //TODO: add transfrom BIN to INT and check numbers size
@@ -20,6 +20,7 @@ MAIN main
 IF if
 ELSE else
 WHILE while
+SKIP skip
 INT_TYPE Int
 BOOL_TYPE Bool
 STRING_TYPE String
@@ -57,6 +58,7 @@ OR "||"
 {IF}          {string_pos+=strlen(yytext); return IF; }
 {ELSE}          {string_pos+=strlen(yytext); return ELSE; }
 {WHILE}          {string_pos+=strlen(yytext); return WHILE; }
+{SKIP}            {string_pos+=strlen(yytext); return SKIP;}
 {INT_TYPE}          {string_pos+=strlen(yytext); return INT_TYPE; }
 {BOOL_TYPE}          {string_pos+=strlen(yytext); return BOOL_TYPE; }
 {STRING_TYPE}          {string_pos+=strlen(yytext); return STRING_TYPE; }

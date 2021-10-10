@@ -74,6 +74,7 @@ optional_else: ELSE code_block {}
 while_statement: WHILE LP EXPR RP code_block {};
 
 EXPR : CONST {}
+| MINUS EXPR {}
 | VAR {cout << *$1 << endl;}
 | LP EXPR RP {}
 | EXPR PLUS  EXPR {}

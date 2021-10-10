@@ -1,0 +1,49 @@
+%{
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <cassert>
+
+using namespace std;
+
+int yylex();
+
+int yyerror(const char *p) {
+    cerr << "Error! Unexpected token " << p << endl;
+    return 1;
+}
+
+%}
+
+%union {
+    std::string *word;
+    char sym;
+    int num;
+    bool boolean;
+};
+
+%token <word> MAIN IF ELSE WHILE SKIP
+%token <word> INT_TYPE BOOL_TYPE STRING_TYPE
+%token <word> VAR
+%token <word> STRING
+%token <sym> SEP LP RP LB RB ASSIGN
+%token <sym> PLUS MINUS MUL DIV POW
+%token <word> EQ NEQ LT LE GT GE NOT AND OR
+%token <num> INT
+%token <boolean> TRUE_VAL FALSE_VAL
+
+%%
+start: MAIN LP RP LB SKIP SEP RB  {cout << "Main: " << endl;}
+
+
+%%
+
+
+int main(int argc, char* argv[])
+{
+    freopen(argv[1], "r", stdin);
+    yyparse();
+    fclose(stdin);
+
+    return 0;
+}

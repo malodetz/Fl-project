@@ -1,16 +1,32 @@
 %{
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
+#include <limits.h>
+#include <cassert>
+#include <string>
+#include "gram.tab.hpp"
 
 int string_pos = 1;
-enum token{
-   MAIN = 1 , IF = 2 , ELSE = 3 , WHILE = 4 , INT_TYPE = 5 , BOOL_TYPE = 6 , STRING_TYPE = 7 , VAR = 8 , SEP = 9 ,
-   COMMENT = 10 , INT = 11 , BIN = 12 , TRUE_VAL = 13 , FALSE_VAL = 14 , STRING = 15 , PLUS = 16 , MINUS = 17 ,
-   MUL = 18 , DIV = 19 , LP = 20 , RP = 21 , LB = 22 , RB = 23 , XOR = 24 , ASSIGN = 25 , EQ = 26 , NEQ = 27 , LT = 28 ,
-   LE = 29 , GT = 30 , GE = 31 , NOT = 32 , AND = 33 , OR = 34, SKIP = 35
-};
 
-//TODO: add transfrom BIN to INT and check numbers size
+int check_int(){
+    assert(yyleng <= 10);
+    char* p_end;
+    long long tmp = std::strtoll(yytext, &p_end, 10);
+    assert(tmp < INT_MAX);
+    return (int)(tmp);
+}
+
+int check_bin(){
+    assert(yyleng <= 34);
+    std::string s = std::string(yytext, yyleng);
+    return std::stoi(s.substr(2), 0, 2);
+}
+
+void check_and_set_string(){
+    assert(yyleng < 4096);
+    yylval.word = new std::string(yytext, yyleng);
+}
+
 %}
 
 %option yylineno
@@ -40,7 +56,7 @@ LP "("
 RP ")"
 LB "{"
 RB "}"
-XOR "^"
+POW "^"
 ASSIGN "="
 EQ "=="
 NEQ "!="
@@ -54,62 +70,48 @@ OR "||"
 
 %%
 
-{MAIN}          {string_pos+=strlen(yytext); return MAIN; }
-{IF}          {string_pos+=strlen(yytext); return IF; }
-{ELSE}          {string_pos+=strlen(yytext); return ELSE; }
-{WHILE}          {string_pos+=strlen(yytext); return WHILE; }
-{SKIP}            {string_pos+=strlen(yytext); return SKIP;}
-{INT_TYPE}          {string_pos+=strlen(yytext); return INT_TYPE; }
-{BOOL_TYPE}          {string_pos+=strlen(yytext); return BOOL_TYPE; }
-{STRING_TYPE}          {string_pos+=strlen(yytext); return STRING_TYPE; }
-{VAR}          {string_pos+=strlen(yytext); return VAR; }
-{SEP}          {string_pos+=strlen(yytext); return SEP; }
-{INT}          {string_pos+=strlen(yytext); return INT; }
-{BIN}          {string_pos+=strlen(yytext); return BIN; }
-{TRUE_VAL}          {string_pos+=strlen(yytext); return TRUE_VAL; }
-{FALSE_VAL}          {string_pos+=strlen(yytext); return FALSE_VAL; }
-{STRING}          {string_pos+=strlen(yytext); return STRING; }
-{PLUS}          {string_pos+=strlen(yytext); return PLUS; }
-{MINUS}          {string_pos+=strlen(yytext); return MINUS; }
-{MUL}          {string_pos+=strlen(yytext); return MUL; }
-{DIV}          {string_pos+=strlen(yytext); return DIV; }
-{LP}          {string_pos+=strlen(yytext); return LP; }
-{RP}          {string_pos+=strlen(yytext); return RP; }
-{LB}          {string_pos+=strlen(yytext); return LB; }
-{RB}          {string_pos+=strlen(yytext); return RB; }
-{XOR}          {string_pos+=strlen(yytext); return XOR; }
-{ASSIGN}          {string_pos+=strlen(yytext); return ASSIGN; }
-{EQ}          {string_pos+=strlen(yytext); return EQ; }
-{NEQ}          {string_pos+=strlen(yytext); return NEQ; }
-{LT}          {string_pos+=strlen(yytext); return LT; }
-{LE}          {string_pos+=strlen(yytext); return LE; }
-{GT}          {string_pos+=strlen(yytext); return GT; }
-{GE}          {string_pos+=strlen(yytext); return GE; }
-{NOT}          {string_pos+=strlen(yytext); return NOT; }
-{AND}          {string_pos+=strlen(yytext); return AND; }
-{OR}          {string_pos+=strlen(yytext); return OR; }
+{MAIN}          {check_and_set_string(); string_pos+=strlen(yytext); return MAIN; }
+{IF}            {check_and_set_string(); string_pos+=strlen(yytext); return IF; }
+{ELSE}          {check_and_set_string(); string_pos+=strlen(yytext); return ELSE; }
+{WHILE}         {check_and_set_string(); string_pos+=strlen(yytext); return WHILE; }
+{SKIP}          {check_and_set_string(); string_pos+=strlen(yytext); return SKIP;}
+{INT_TYPE}      {check_and_set_string(); string_pos+=strlen(yytext); return INT_TYPE; }
+{BOOL_TYPE}     {check_and_set_string(); string_pos+=strlen(yytext); return BOOL_TYPE; }
+{STRING_TYPE}   {check_and_set_string(); string_pos+=strlen(yytext); return STRING_TYPE; }
+{VAR}           {check_and_set_string(); string_pos+=strlen(yytext); return VAR; }
+{SEP}           {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return SEP; }
+{INT}           {yylval.num = check_int(); string_pos+=strlen(yytext); return INT; }
+{BIN}           {yylval.num = check_bin(); string_pos+=strlen(yytext); return INT; }
+{TRUE_VAL}      {yylval.boolean = true; string_pos+=strlen(yytext); return TRUE_VAL; }
+{FALSE_VAL}     {yylval.boolean = false; string_pos+=strlen(yytext); return FALSE_VAL; }
+{STRING}        {check_and_set_string(); string_pos+=strlen(yytext); return STRING; }
+{PLUS}          {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return PLUS; }
+{MINUS}         {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return MINUS; }
+{MUL}           {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return MUL; }
+{DIV}           {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return DIV; }
+{LP}            {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return LP; }
+{RP}            {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return RP; }
+{LB}            {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return LB; }
+{RB}            {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return RB; }
+{POW}           {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return POW; }
+{ASSIGN}        {yylval.sym = yytext[0]; string_pos+=strlen(yytext); return ASSIGN; }
+{EQ}            {check_and_set_string(); string_pos+=strlen(yytext); return EQ; }
+{NEQ}           {check_and_set_string(); string_pos+=strlen(yytext); return NEQ; }
+{LT}            {check_and_set_string(); string_pos+=strlen(yytext); return LT; }
+{LE}            {check_and_set_string(); string_pos+=strlen(yytext); return LE; }
+{GT}            {check_and_set_string(); string_pos+=strlen(yytext); return GT; }
+{GE}            {check_and_set_string(); string_pos+=strlen(yytext); return GE; }
+{NOT}           {check_and_set_string(); string_pos+=strlen(yytext); return NOT; }
+{AND}           {check_and_set_string(); string_pos+=strlen(yytext); return AND; }
+{OR}            {check_and_set_string(); string_pos+=strlen(yytext); return OR; }
 
-{COMMENT}         {string_pos+=strlen(yytext);}
-[ \t\r]           {string_pos++;}
-[\n]              {string_pos = 1;}
+{COMMENT}       {string_pos+=strlen(yytext);}
+[ \t\r]         {string_pos++;}
+[\n]            {string_pos = 1;}
 
-<<EOF>>           {return 0;}
-
-.                 {
-                    printf("ERROR in line %u, pos %u, symbol %s\n", yylineno, string_pos, yytext);
-                    exit(1);
-                  }
+.               {
+                  printf("ERROR in line %u, pos %u, symbol %s\n", yylineno, string_pos, yytext);
+                  exit(1);
+                }
 
 %%
-
-int main(int argc, char* argv[]) {
-  freopen(argv[1], "r", stdin);
-  while (1) {
-     int t = yylex();
-     if (t == 0) {
-          break;
-     }
-    printf("%s %d\n", yytext, t);
-  };
-  return EXIT_SUCCESS ;
-}

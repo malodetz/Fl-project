@@ -35,10 +35,10 @@ int yyerror(const char *p) {
 %left OR
 %left AND
 %left NOT
-%left EQ NEQ LT LE GT GE
+%nonassoc EQ NEQ LT LE GT GE
 %left PLUS MINUS
 %left MUL DIV
-%left POW
+%right POW
 
 %%
 start: MAIN LP RP code_block  {cout << "Main: " << endl;}

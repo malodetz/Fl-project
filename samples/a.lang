@@ -17,4 +17,8 @@ main(){
     while (True){
         skip;
     }
+
+    if (y==2){
+        skip;
+    }
 }

@@ -32,6 +32,14 @@ int yyerror(const char *p) {
 %token <num> INT
 %token <boolean> TRUE_VAL FALSE_VAL
 
+%left OR
+%left AND
+%left NOT
+%left EQ NEQ LT LE GT GE
+%left PLUS MINUS
+%left MUL DIV
+%left POW
+
 %%
 start: MAIN LP RP code_block  {cout << "Main: " << endl;}
 
@@ -43,32 +51,48 @@ statements_seq: statements_seq statement {}
 statement: declaration {}
 | assignment {}
 | skip {}
+| if_statement {}
+| while_statement {}
 ;
 
 skip: SKIP SEP {}
 
-assignment: int_assignment | string_assignment | bool_assignment {}
+declaration: type VAR ASSIGN EXPR SEP {cout << *$2 << endl;}
 
-int_assignment: VAR ASSIGN int_expr SEP {}
+type: INT_TYPE | BOOL_TYPE | STRING_TYPE
 
-string_assignment: VAR ASSIGN string_expr SEP {}
+assignment: VAR ASSIGN EXPR SEP {cout << *$1 << endl;}
 
-bool_assignment: VAR ASSIGN bool_expr SEP {}
+if_statement: if_stmt optional_else {}
 
-declaration: int_declaration | string_declaration | bool_declaration {}
+if_stmt: IF LP EXPR RP code_block {}
 
-int_declaration: INT_TYPE int_assignment {}
+optional_else: ELSE code_block {}
+| {}
+;
 
-string_declaration: STRING_TYPE string_assignment {}
+while_statement: WHILE LP EXPR RP code_block {};
 
-bool_declaration: BOOL_TYPE bool_assignment {}
+EXPR : CONST {}
+| VAR {cout << *$1 << endl;}
+| LP EXPR RP {}
+| EXPR PLUS  EXPR {}
+| EXPR MINUS EXPR {}
+| EXPR MUL   EXPR {}
+| EXPR DIV   EXPR {}
+| EXPR POW   EXPR {}
+| NOT EXPR {}
+| EXPR AND EXPR {}
+| EXPR OR EXPR {}
+| EXPR EQ EXPR {}
+| EXPR NEQ EXPR {}
+| EXPR LE EXPR {}
+| EXPR LT EXPR {}
+| EXPR GE EXPR {}
+| EXPR GT EXPR {}
+;
 
-int_expr: INT {cout << $1 << endl;}
-
-string_expr: STRING {cout << $1 << endl;}
-
-bool_expr: TRUE_VAL {cout << $1 << endl;}
-| FALSE_VAL {cout << $1 << endl;}
+CONST: INT | STRING | TRUE_VAL | FALSE_VAL {}
 
 %%
 

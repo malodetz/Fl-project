@@ -1,10 +1,10 @@
 %{
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
-#include <limits.h>
+#include <climits>
 #include <cassert>
 #include <string>
-#include "gram.tab.hpp"
+#include "parser.hpp"
 
 int string_pos = 1;
 

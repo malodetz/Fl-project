@@ -33,8 +33,42 @@ int yyerror(const char *p) {
 %token <boolean> TRUE_VAL FALSE_VAL
 
 %%
-start: MAIN LP RP LB SKIP SEP RB  {cout << "Main: " << endl;}
+start: MAIN LP RP code_block  {cout << "Main: " << endl;}
 
+code_block: LB statements_seq RB {}
+
+statements_seq: statements_seq statement {}
+| statement {}
+
+statement: declaration {}
+| assignment {}
+| skip {}
+;
+
+skip: SKIP SEP {}
+
+assignment: int_assignment | string_assignment | bool_assignment {}
+
+int_assignment: VAR ASSIGN int_expr SEP {}
+
+string_assignment: VAR ASSIGN string_expr SEP {}
+
+bool_assignment: VAR ASSIGN bool_expr SEP {}
+
+declaration: int_declaration | string_declaration | bool_declaration {}
+
+int_declaration: INT_TYPE int_assignment {}
+
+string_declaration: STRING_TYPE string_assignment {}
+
+bool_declaration: BOOL_TYPE bool_assignment {}
+
+int_expr: INT {cout << $1 << endl;}
+
+string_expr: STRING {cout << $1 << endl;}
+
+bool_expr: TRUE_VAL {cout << $1 << endl;}
+| FALSE_VAL {cout << $1 << endl;}
 
 %%
 

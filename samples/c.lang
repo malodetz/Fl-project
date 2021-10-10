@@ -1,0 +1,14 @@
+main(){
+    Int x = 5;
+
+    Bool f = True;
+    skip;
+    String s = "bbb";
+
+    f = False;
+
+    s = "aaa";
+    Int z = 3;
+
+    x = 0b11001;
+}

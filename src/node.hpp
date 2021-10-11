@@ -2,9 +2,12 @@
     A definition of AST node is here
 */
 #pragma once
+
+#include <llvm/IR/Value.h>
+
 #include <vector>
 #include <string>
-#include <llvm/IR/Value.h>
+#include <iostream>
 
 namespace AST
 {
@@ -40,6 +43,29 @@ namespace AST
         Or
     };
 
+    std::string ShowType(DataType type)
+    {
+        switch (type)
+        {
+        case DataType::None:
+            return "None";
+            break;
+        case DataType::String:
+            return "String";
+            break;
+        case DataType::Int:
+            return "Int";
+            break;
+        case DataType::Bool:
+            return "Bool";
+            break;
+        default:
+            llvm_unreachable("ShowType: unknown DataType!");
+            return "Wtf?\n";
+            break;
+        }
+    }
+
     struct CodeGenContext;
 
     struct Node
@@ -51,12 +77,16 @@ namespace AST
         }
     };
 
-    // TODO: add type checking in all Expressions
     struct Expression : Node
     {
         DataType type;
         virtual llvm::Value *CodeGen(CodeGenContext &context);
     };
+
+    bool HasType(const Expression &e, DataType type)
+    {
+        return e.type == type;
+    }
 
     struct Statement : Node
     {
@@ -84,7 +114,20 @@ namespace AST
     {
         UnaryOpType op;
         Expression &expr;
-        UnaryOp(UnaryOpType op_, Expression &expr_) : op(op_), expr(expr_) {}
+        UnaryOp(UnaryOpType op_, Expression &expr_) : op(op_), expr(expr_)
+        {
+            // checking for type matching
+            switch (op)
+            {
+            case UnaryOpType::Minus:
+                if (!HasType(expr, DataType::Int))
+                {
+                    std::cerr << "UnaryOp Minus, type is " << ShowType(expr.type);
+                    // throw ??
+                }
+                break;
+            }
+        }
         virtual llvm::Value *CodeGen(CodeGenContext &context);
     };
 
@@ -93,7 +136,9 @@ namespace AST
         BinaryOpType op;
         Expression &lhs;
         Expression &rhs;
-        BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_) : op(op_), lhs(lhs_), rhs(rhs_) {}
+        BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_) : op(op_), lhs(lhs_), rhs(rhs_) {
+            // TODO add check
+        }
         virtual llvm::Value *CodeGen(CodeGenContext &context);
     };
 }

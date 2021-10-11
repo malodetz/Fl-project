@@ -88,6 +88,11 @@ namespace AST
         return e.type == type;
     }
 
+    bool SameType(const Expression &lhs, const Expression &rhs)
+    {
+        return lhs.type == rhs.type;
+    }
+
     struct Statement : Node
     {
     };
@@ -138,7 +143,54 @@ namespace AST
         Expression &rhs;
         BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_) : op(op_), lhs(lhs_), rhs(rhs_)
         {
-            // TODO add check
+            std::string errorMsg = "BinOp, wrong types!\n";
+            switch (op)
+            {
+            case BinaryOpType::Pow:
+            case BinaryOpType::Mult:
+            case BinaryOpType::Div:
+            case BinaryOpType::Sub:
+            case BinaryOpType::Leq:
+            case BinaryOpType::Les:
+            case BinaryOpType::Geq:
+            case BinaryOpType::Gre:
+            {
+                if (!HasType(lhs, DataType::Int) || !HasType(rhs, DataType::Int))
+                {
+                    std::cerr << errorMsg;
+                }
+                break;
+            }
+            case BinaryOpType::Sum:
+            {
+                bool bothInt = HasType(lhs, DataType::Int) && HasType(rhs, DataType::Int);
+                bool bothStr = HasType(lhs, DataType::Int) && HasType(rhs, DataType::Int);
+                if (!bothInt && !bothStr)
+                {
+                    std::cerr << errorMsg;
+                }
+                break;
+            }
+            case BinaryOpType::Eq:
+            case BinaryOpType::Neq:
+            {
+                if (!SameType(lhs, rhs))
+                {
+                    std::cerr << errorMsg;
+                }
+                break;
+            }
+            case BinaryOpType::And:
+            case BinaryOpType::Or:
+            {
+                if (!HasType(lhs, DataType::Bool) || !HasType(lhs, DataType::Bool))
+                {
+                    std::cerr << errorMsg;
+                }
+            }
+            default:
+                std::cerr << "Unknown BinOp\n";
+            }
         }
         virtual llvm::Value *CodeGen(CodeGenContext &context);
     };

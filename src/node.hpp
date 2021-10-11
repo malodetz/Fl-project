@@ -100,6 +100,10 @@ namespace AST
     {
     };
 
+
+    
+    // Kinds of expression
+
     template <class LiteralType>
     struct Constant : Expression
     {
@@ -111,10 +115,10 @@ namespace AST
     };
 
     // Gonna find value in context
-    struct NIdentifier : public Expression
+    struct Identifier : public Expression
     {
         std::string name;
-        NIdentifier(std::string name_) : name(std::move(name_)) {}
+        Identifier(std::string name_) : name(std::move(name_)) {}
         virtual llvm::Value *CodeGen(CodeGenContext &context);
     };
 
@@ -198,4 +202,7 @@ namespace AST
         }
         virtual llvm::Value *CodeGen(CodeGenContext &context);
     };
+
+    // Kinds of statement
+    struct Skip
 }

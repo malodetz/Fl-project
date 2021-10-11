@@ -12,6 +12,7 @@
 #include <iostream>
 #include <exception>
 #include <memory>
+#include <optional>
 
 namespace AST
 {
@@ -47,6 +48,15 @@ namespace AST
         Or
     };
 
+    struct CodeGenContext;
+    struct Node;
+    struct Expression;
+    struct Statement;
+
+    using StatementList = std::vector<Statement *>;
+
+    // TODO make .hpp file with ^^^^^^^^^^
+
     std::string ShowType(DataType type)
     {
         switch (type)
@@ -69,8 +79,6 @@ namespace AST
             break;
         }
     }
-
-    struct CodeGenContext;
 
     struct Node
     {
@@ -99,6 +107,12 @@ namespace AST
 
     struct Statement : Node
     {
+        virtual llvm::Value *CodeGen(CodeGenContext &context);
+    };
+
+    struct CodeBlock : Node
+    {
+        StatementList statements;
         virtual llvm::Value *CodeGen(CodeGenContext &context);
     };
 
@@ -214,14 +228,15 @@ namespace AST
     {
         Identifier *ident;
         Expression &expr;
-        VarDecl(Identifier * ident_, Expression &expr_) :
-        ident(ident_),
-        expr(expr_)
+        VarDecl(Identifier *ident_, Expression &expr_) : ident(ident_),
+                                                         expr(expr_)
         {
-            if (ident == nullptr) {
+            if (ident == nullptr)
+            {
                 throw std::runtime_error("Nullptr ident in VarDecl");
             }
-            if (!SameType(*ident, expr)) {
+            if (!SameType(*ident, expr))
+            {
                 throw std::runtime_error("Mismatched typed in VarDecl");
             }
         }
@@ -232,18 +247,49 @@ namespace AST
     {
         Identifier *ident;
         Expression &expr;
-        VarAssign(Identifier * ident_, Expression &expr_) :
-        ident(ident_),
-        expr(expr_)
+        VarAssign(Identifier *ident_, Expression &expr_) : ident(ident_),
+                                                           expr(expr_)
         {
-            if (ident == nullptr) {
+            if (ident == nullptr)
+            {
                 throw std::runtime_error("Nullptr ident in VarAssign");
             }
-            if (!SameType(*ident, expr)) {
+            if (!SameType(*ident, expr))
+            {
                 throw std::runtime_error("Mismatched typed in VarAssign");
             }
         }
         virtual llvm::Value *CodeGen(CodeGenContext &context);
+    };
+
+    struct WhileLoop : Statement
+    {
+        Expression &expr;
+        CodeBlock code_block;
+        WhileLoop(Expression &expr_, CodeBlock code_block_) : expr(expr_),
+                                                              code_block(std::move(code_block_))
+        {
+            if (!HasType(expr, DataType::Bool))
+            {
+                throw std::runtime_error("Non-bool expr in WhileLoop");
+            }
+        }
+    };
+
+    struct IfStatement : Statement
+    {
+        Expression &expr;
+        CodeBlock on_if;
+        std::optional<CodeBlock> on_else;
+        IfStatement(Expression &expr_, CodeBlock on_if_, std::optional<CodeBlock> on_else_) : expr(expr_),
+                                                                                              on_if(std::move(on_if_)),
+                                                                                              on_else(std::move(on_else_))
+        {
+            if (!HasType(expr, DataType::Bool))
+            {
+                throw std::runtime_error("Non-bool expr in WhileLoop");
+            }
+        }
     };
 
 }

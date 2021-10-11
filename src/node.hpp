@@ -1,5 +1,7 @@
 /*
     A definition of AST node is here
+
+    We use exceptions to detect any kind of error (such as Type Mismatch)
 */
 #pragma once
 
@@ -8,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <exception>
 
 namespace AST
 {
@@ -121,16 +124,17 @@ namespace AST
         Expression &expr;
         UnaryOp(UnaryOpType op_, Expression &expr_) : op(op_), expr(expr_)
         {
-            // checking for type matching
+            const char * errorMsg = "UnaryOp with wrong type";
             switch (op)
             {
             case UnaryOpType::Minus:
+            {
                 if (!HasType(expr, DataType::Int))
                 {
-                    std::cerr << "UnaryOp Minus, type is " << ShowType(expr.type);
-                    // throw ??
+                    throw std::runtime_error(errorMsg);
                 }
                 break;
+            }
             }
         }
         virtual llvm::Value *CodeGen(CodeGenContext &context);
@@ -143,7 +147,7 @@ namespace AST
         Expression &rhs;
         BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_) : op(op_), lhs(lhs_), rhs(rhs_)
         {
-            std::string errorMsg = "BinOp, wrong types!\n";
+            const char * errorMsg = "BinOp with wrong types";
             switch (op)
             {
             case BinaryOpType::Pow:
@@ -157,7 +161,7 @@ namespace AST
             {
                 if (!HasType(lhs, DataType::Int) || !HasType(rhs, DataType::Int))
                 {
-                    std::cerr << errorMsg;
+                    throw std::runtime_error(errorMsg);
                 }
                 break;
             }
@@ -167,7 +171,7 @@ namespace AST
                 bool bothStr = HasType(lhs, DataType::Int) && HasType(rhs, DataType::Int);
                 if (!bothInt && !bothStr)
                 {
-                    std::cerr << errorMsg;
+                    throw std::runtime_error(errorMsg);
                 }
                 break;
             }
@@ -176,7 +180,7 @@ namespace AST
             {
                 if (!SameType(lhs, rhs))
                 {
-                    std::cerr << errorMsg;
+                    throw std::runtime_error(errorMsg);
                 }
                 break;
             }
@@ -185,7 +189,7 @@ namespace AST
             {
                 if (!HasType(lhs, DataType::Bool) || !HasType(lhs, DataType::Bool))
                 {
-                    std::cerr << errorMsg;
+                    throw std::runtime_error(errorMsg);
                 }
             }
             default:

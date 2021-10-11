@@ -11,6 +11,7 @@
 #include <string>
 #include <iostream>
 #include <exception>
+#include <memory>
 
 namespace AST
 {
@@ -98,10 +99,9 @@ namespace AST
 
     struct Statement : Node
     {
+        virtual llvm::Value *CodeGen(CodeGenContext &context);
     };
 
-
-    
     // Kinds of expression
 
     template <class LiteralType>
@@ -128,7 +128,7 @@ namespace AST
         Expression &expr;
         UnaryOp(UnaryOpType op_, Expression &expr_) : op(op_), expr(expr_)
         {
-            const char * errorMsg = "UnaryOp with wrong type";
+            const char *errorMsg = "UnaryOp with wrong type";
             switch (op)
             {
             case UnaryOpType::Minus:
@@ -151,7 +151,7 @@ namespace AST
         Expression &rhs;
         BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_) : op(op_), lhs(lhs_), rhs(rhs_)
         {
-            const char * errorMsg = "BinOp with wrong types";
+            const char *errorMsg = "BinOp with wrong types";
             switch (op)
             {
             case BinaryOpType::Pow:
@@ -204,5 +204,46 @@ namespace AST
     };
 
     // Kinds of statement
-    struct Skip
+
+    struct Skip : Statement
+    {
+        virtual llvm::Value *CodeGen(CodeGenContext &context);
+    };
+
+    struct VarDecl : Statement
+    {
+        Identifier *ident;
+        Expression &expr;
+        VarDecl(Identifier * ident_, Expression &expr_) :
+        ident(ident_),
+        expr(expr_)
+        {
+            if (ident == nullptr) {
+                throw std::runtime_error("Nullptr ident in VarDecl");
+            }
+            if (!SameType(*ident, expr)) {
+                throw std::runtime_error("Mismatched typed in VarDecl");
+            }
+        }
+        virtual llvm::Value *CodeGen(CodeGenContext &context);
+    };
+
+    struct VarAssign : Statement
+    {
+        Identifier *ident;
+        Expression &expr;
+        VarAssign(Identifier * ident_, Expression &expr_) :
+        ident(ident_),
+        expr(expr_)
+        {
+            if (ident == nullptr) {
+                throw std::runtime_error("Nullptr ident in VarAssign");
+            }
+            if (!SameType(*ident, expr)) {
+                throw std::runtime_error("Mismatched typed in VarAssign");
+            }
+        }
+        virtual llvm::Value *CodeGen(CodeGenContext &context);
+    };
+
 }

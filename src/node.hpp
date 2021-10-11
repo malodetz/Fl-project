@@ -92,7 +92,7 @@ namespace AST
     struct Expression : Node
     {
         DataType type;
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     bool HasType(const Expression &e, DataType type)
@@ -107,13 +107,13 @@ namespace AST
 
     struct Statement : Node
     {
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     struct CodeBlock : Node
     {
         StatementList statements;
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     // Kinds of expression
@@ -125,7 +125,7 @@ namespace AST
         Constant(LiteralType val_) : val(val_)
         {
         }
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     // Gonna find value in context
@@ -133,7 +133,7 @@ namespace AST
     {
         std::string name;
         Identifier(std::string name_) : name(std::move(name_)) {}
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     struct UnaryOp : public Expression
@@ -155,7 +155,7 @@ namespace AST
             }
             }
         }
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     struct BinaryOp : public Expression
@@ -214,14 +214,14 @@ namespace AST
                 std::cerr << "Unknown BinOp\n";
             }
         }
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     // Kinds of statement
 
     struct Skip : Statement
     {
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     struct VarDecl : Statement
@@ -240,7 +240,7 @@ namespace AST
                 throw std::runtime_error("Mismatched typed in VarDecl");
             }
         }
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     struct VarAssign : Statement
@@ -259,7 +259,7 @@ namespace AST
                 throw std::runtime_error("Mismatched typed in VarAssign");
             }
         }
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     struct WhileLoop : Statement

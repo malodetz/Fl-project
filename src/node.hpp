@@ -136,7 +136,8 @@ namespace AST
         BinaryOpType op;
         Expression &lhs;
         Expression &rhs;
-        BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_) : op(op_), lhs(lhs_), rhs(rhs_) {
+        BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_) : op(op_), lhs(lhs_), rhs(rhs_)
+        {
             // TODO add check
         }
         virtual llvm::Value *CodeGen(CodeGenContext &context);

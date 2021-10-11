@@ -22,6 +22,8 @@ parser.hpp: parser.cpp
 lexer.cpp: lexer.l parser.hpp 
 	flex -o $@ $^
 
+node.cpp: node.hpp
+
 $(BUILDDIR)/%.o: %.cpp 
 	g++ -c $< ${CPPFLAGS} -o $@ 
 

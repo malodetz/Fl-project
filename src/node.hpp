@@ -1,5 +1,7 @@
 /*
     A definition of AST node is here
+
+    We use exceptions to detect any kind of error (such as Type Mismatch)
 */
 #pragma once
 
@@ -8,6 +10,9 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <exception>
+#include <memory>
+#include <optional>
 
 namespace AST
 {
@@ -43,6 +48,15 @@ namespace AST
         Or
     };
 
+    struct CodeGenContext;
+    struct Node;
+    struct Expression;
+    struct Statement;
+
+    using StatementList = std::vector<Statement *>;
+
+    // TODO make .hpp file with ^^^^^^^^^^
+
     std::string ShowType(DataType type)
     {
         switch (type)
@@ -66,8 +80,6 @@ namespace AST
         }
     }
 
-    struct CodeGenContext;
-
     struct Node
     {
         virtual ~Node() {}
@@ -80,7 +92,7 @@ namespace AST
     struct Expression : Node
     {
         DataType type;
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     bool HasType(const Expression &e, DataType type)
@@ -88,9 +100,23 @@ namespace AST
         return e.type == type;
     }
 
+    bool SameType(const Expression &lhs, const Expression &rhs)
+    {
+        return lhs.type == rhs.type;
+    }
+
     struct Statement : Node
     {
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
+
+    struct CodeBlock : Node
+    {
+        StatementList statements;
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
+    };
+
+    // Kinds of expression
 
     template <class LiteralType>
     struct Constant : Expression
@@ -99,15 +125,15 @@ namespace AST
         Constant(LiteralType val_) : val(val_)
         {
         }
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     // Gonna find value in context
-    struct NIdentifier : public Expression
+    struct Identifier : public Expression
     {
         std::string name;
-        NIdentifier(std::string name_) : name(std::move(name_)) {}
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        Identifier(std::string name_) : name(std::move(name_)) {}
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     struct UnaryOp : public Expression
@@ -116,19 +142,20 @@ namespace AST
         Expression &expr;
         UnaryOp(UnaryOpType op_, Expression &expr_) : op(op_), expr(expr_)
         {
-            // checking for type matching
+            const char *errorMsg = "UnaryOp with wrong type";
             switch (op)
             {
             case UnaryOpType::Minus:
+            {
                 if (!HasType(expr, DataType::Int))
                 {
-                    std::cerr << "UnaryOp Minus, type is " << ShowType(expr.type);
-                    // throw ??
+                    throw std::runtime_error(errorMsg);
                 }
                 break;
             }
+            }
         }
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
 
     struct BinaryOp : public Expression
@@ -138,8 +165,131 @@ namespace AST
         Expression &rhs;
         BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_) : op(op_), lhs(lhs_), rhs(rhs_)
         {
-            // TODO add check
+            const char *errorMsg = "BinOp with wrong types";
+            switch (op)
+            {
+            case BinaryOpType::Pow:
+            case BinaryOpType::Mult:
+            case BinaryOpType::Div:
+            case BinaryOpType::Sub:
+            case BinaryOpType::Leq:
+            case BinaryOpType::Les:
+            case BinaryOpType::Geq:
+            case BinaryOpType::Gre:
+            {
+                if (!HasType(lhs, DataType::Int) || !HasType(rhs, DataType::Int))
+                {
+                    throw std::runtime_error(errorMsg);
+                }
+                break;
+            }
+            case BinaryOpType::Sum:
+            {
+                bool bothInt = HasType(lhs, DataType::Int) && HasType(rhs, DataType::Int);
+                bool bothStr = HasType(lhs, DataType::Int) && HasType(rhs, DataType::Int);
+                if (!bothInt && !bothStr)
+                {
+                    throw std::runtime_error(errorMsg);
+                }
+                break;
+            }
+            case BinaryOpType::Eq:
+            case BinaryOpType::Neq:
+            {
+                if (!SameType(lhs, rhs))
+                {
+                    throw std::runtime_error(errorMsg);
+                }
+                break;
+            }
+            case BinaryOpType::And:
+            case BinaryOpType::Or:
+            {
+                if (!HasType(lhs, DataType::Bool) || !HasType(lhs, DataType::Bool))
+                {
+                    throw std::runtime_error(errorMsg);
+                }
+            }
+            default:
+                std::cerr << "Unknown BinOp\n";
+            }
         }
-        virtual llvm::Value *CodeGen(CodeGenContext &context);
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
     };
+
+    // Kinds of statement
+
+    struct Skip : Statement
+    {
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
+    };
+
+    struct VarDecl : Statement
+    {
+        Identifier *ident;
+        Expression &expr;
+        VarDecl(Identifier *ident_, Expression &expr_) : ident(ident_),
+                                                         expr(expr_)
+        {
+            if (ident == nullptr)
+            {
+                throw std::runtime_error("Nullptr ident in VarDecl");
+            }
+            if (!SameType(*ident, expr))
+            {
+                throw std::runtime_error("Mismatched typed in VarDecl");
+            }
+        }
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
+    };
+
+    struct VarAssign : Statement
+    {
+        Identifier *ident;
+        Expression &expr;
+        VarAssign(Identifier *ident_, Expression &expr_) : ident(ident_),
+                                                           expr(expr_)
+        {
+            if (ident == nullptr)
+            {
+                throw std::runtime_error("Nullptr ident in VarAssign");
+            }
+            if (!SameType(*ident, expr))
+            {
+                throw std::runtime_error("Mismatched typed in VarAssign");
+            }
+        }
+        virtual llvm::Value *CodeGen(CodeGenContext &context) { return nullptr; }
+    };
+
+    struct WhileLoop : Statement
+    {
+        Expression &expr;
+        CodeBlock code_block;
+        WhileLoop(Expression &expr_, CodeBlock code_block_) : expr(expr_),
+                                                              code_block(std::move(code_block_))
+        {
+            if (!HasType(expr, DataType::Bool))
+            {
+                throw std::runtime_error("Non-bool expr in WhileLoop");
+            }
+        }
+    };
+
+    struct IfStatement : Statement
+    {
+        Expression &expr;
+        CodeBlock on_if;
+        std::optional<CodeBlock> on_else;
+        IfStatement(Expression &expr_, CodeBlock on_if_, std::optional<CodeBlock> on_else_) : expr(expr_),
+                                                                                              on_if(std::move(on_if_)),
+                                                                                              on_else(std::move(on_else_))
+        {
+            if (!HasType(expr, DataType::Bool))
+            {
+                throw std::runtime_error("Non-bool expr in WhileLoop");
+            }
+        }
+    };
+
 }

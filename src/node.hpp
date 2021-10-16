@@ -58,11 +58,14 @@ namespace AST
 
     using StatementList = std::vector<Statement *>;
 
-    static std::unordered_map<std::string, Identifier *> Variables;
     static StatementList CurCodeBlock;
     // TODO make .hpp file with ^^^^^^^^^^
 
     std::string ShowType(DataType type);
+
+    std::unordered_map<std::string, Identifier *> &Variables();
+
+    void PrintVarDict();
 
     struct Node
     {

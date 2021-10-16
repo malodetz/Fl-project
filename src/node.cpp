@@ -225,5 +225,6 @@ namespace AST {
             {
                 throw std::runtime_error("Non-bool expr in WhileLoop");
             }
+            std::cerr << "If statement created" << std::endl;
         }
 }

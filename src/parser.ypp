@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdlib>
 #include <cassert>
+#include <optional>
 
 
 using namespace std;
@@ -32,6 +33,7 @@ int yyerror(const char *p) {
     AST::Statement *statement;
     AST::Skip *skip;
     AST::IfStatement *if_stmt;
+    std::optional<AST::CodeBlock> *else_stmt;
 }
 
 %token <word> MAIN IF ELSE WHILE SKIP
@@ -62,7 +64,7 @@ int yyerror(const char *p) {
 %type <statement> statement;
 %type <skip> skip;
 %type <if_stmt> if_statement;
-%type <if_stmt> if_stmt;
+%type <else_stmt> optional_else;
 
 %%
 start: MAIN LP RP code_block  {cout << "Main: " << endl;}
@@ -112,12 +114,16 @@ assignment: VAR ASSIGN EXPR SEP {
     $$ = new AST::VarAssign(*$1, *$3);
 }
 
-if_statement: if_stmt optional_else {}
+if_statement: IF LP EXPR RP code_block optional_else {
+    $$ = new AST::IfStatement(*$3, *$5, *$6);
+}
 
-if_stmt: IF LP EXPR RP code_block {}
-
-optional_else: ELSE code_block {}
-| {}
+optional_else: ELSE code_block {
+    $$ = new std::optional<AST::CodeBlock>{*$2};
+}
+| {
+    $$ = new std::optional<AST::CodeBlock>;
+}
 ;
 
 while_statement: WHILE LP EXPR RP code_block {

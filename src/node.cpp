@@ -1,5 +1,6 @@
 #include <exception>
 #include <string>
+#include <unordered_map>
 #include "node.hpp"
 
 namespace AST {
@@ -25,6 +26,18 @@ namespace AST {
             break;
         }
     }    
+
+    void PrintVarDict() {
+        std::cerr << "Printing Variable List..." << std::endl;
+        for (auto &p : Variables()) {
+            std::cerr << p.first << ' ' << intptr_t(p.second) << '\n';
+        }
+    }
+
+    std::unordered_map<std::string, Identifier *> &Variables() {
+        static std::unordered_map<std::string, Identifier *> variables;
+        return variables;
+    }
 
     Node::~Node() {}
 
@@ -54,7 +67,7 @@ namespace AST {
             type = std::move(type_);
             std::cerr << "Identifier " << name << " created" << '\n';  
 
-            Variables[name] = this;
+            // Variables[name] = this;
             std::cerr << "[Variables] <--- " << name << std::endl;
     }
 
@@ -69,7 +82,17 @@ namespace AST {
             {
                 case UnaryOpType::Minus:
                 {
+                    type = DataType::Int;
                     if (!HasType(expr, DataType::Int))
+                    {
+                        throw std::runtime_error(errorMsg);
+                    }
+                    break;
+                }
+                case UnaryOpType::Neg:
+                {
+                    type = DataType::Bool;
+                    if (!HasType(expr, DataType::Bool))
                     {
                         throw std::runtime_error(errorMsg);
                     }
@@ -124,9 +147,35 @@ namespace AST {
                 {
                     throw std::runtime_error(errorMsg);
                 }
+                break;
             }
             default:
                 std::cerr << "Unknown BinOp\n";
+            }
+
+            switch (op)
+            {
+            case BinaryOpType::Pow:
+            case BinaryOpType::Mult:
+            case BinaryOpType::Div:
+            case BinaryOpType::Sub:
+            case BinaryOpType::Sum:
+            {
+                type = DataType::Int;
+                break;
+            }
+            case BinaryOpType::Leq:
+            case BinaryOpType::Les:
+            case BinaryOpType::Geq:
+            case BinaryOpType::Gre:
+            case BinaryOpType::Eq:
+            case BinaryOpType::Neq:
+            case BinaryOpType::And:
+            case BinaryOpType::Or:
+            {
+                type = DataType::Bool;
+                break;
+            }
             }
         }
 
@@ -146,7 +195,7 @@ namespace AST {
         VarAssign::VarAssign(std::string &ident_name, Expression &expr_) :
                                                            expr(expr_)
         {
-            ident = Variables[ident_name];
+            ident = Variables()[ident_name];
             if (ident == nullptr)
             {
                 throw std::runtime_error("Nullptr ident in VarAssign");
@@ -165,6 +214,7 @@ namespace AST {
             {
                 throw std::runtime_error("Non-bool expr in WhileLoop");
             }
+            std::cerr << "While cycle created" << std::endl;
         }
 
         IfStatement::IfStatement(Expression &expr_, CodeBlock on_if_, std::optional<CodeBlock> on_else_) : expr(expr_),

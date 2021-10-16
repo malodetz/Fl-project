@@ -4,6 +4,7 @@
 #include <climits>
 #include <cassert>
 #include <string>
+#include "node.hpp"
 #include "parser.hpp"
 
 int string_pos = 1;
@@ -14,6 +15,7 @@ int check_int(){
     long long tmp = std::strtoll(yytext, &p_end, 10);
     assert(tmp < INT_MAX);
     return (int)(tmp);
+
 }
 
 int check_bin(){

@@ -1,5 +1,3 @@
-
-
 LLVMCONFIG = llvm-config
 CPPFLAGS = `$(LLVMCONFIG) --cppflags` -std=c++17
 LDFLAGS = `$(LLVMCONFIG) --ldflags` -lpthread -ldl -lz -lncurses -rdynamic
@@ -7,7 +5,7 @@ LIBS = `$(LLVMCONFIG) --libs`
 
 BUILDDIR = build
 
-OBJS = $(BUILDDIR)/parser.o $(BUILDDIR)/lexer.o  ${BUILDDIR}/node.o
+OBJS = $(BUILDDIR)/parser.o $(BUILDDIR)/lexer.o  ${BUILDDIR}/node.o ${BUILDDIR}/codegen.o
 
 all: $(BUILDDIR)/parser
 
@@ -22,7 +20,9 @@ parser.hpp: parser.cpp
 lexer.cpp: lexer.l parser.hpp 
 	flex -o $@ $^
 
-node.cpp: node.hpp
+node.cpp: node.hpp decl.hpp
+
+codegen.cpp: node.hpp decl.hpp codegen.hpp
 
 $(BUILDDIR)/%.o: %.cpp 
 	g++ -c $< ${CPPFLAGS} -o $@ 

@@ -2,229 +2,230 @@
 #include <string>
 #include <unordered_map>
 #include "node.hpp"
+#include <llvm/IR/Value.h>
 
-namespace AST {
-    std::string ShowType(DataType type)
+namespace AST
+{
+    namespace details
     {
-        switch (type)
+
+        DataType GetType(int val)
         {
-        case DataType::None:
-            return "None";
-            break;
-        case DataType::String:
-            return "String";
-            break;
-        case DataType::Int:
-            return "Int";
-            break;
-        case DataType::Bool:
-            return "Bool";
-            break;
-        default:
-            // llvm_unreachable("ShowType: unknown DataType!");
-            return "Wtf?\n";
-            break;
+            return DataType::Int;
         }
-    }    
 
-    void PrintVarDict() {
-        std::cerr << "Printing Variable List..." << std::endl;
-        for (auto &p : Variables()) {
-            std::cerr << p.first << ' ' << intptr_t(p.second) << '\n';
+        DataType GetType(bool val)
+        {
+            return DataType::Bool;
         }
-    }
 
-    std::unordered_map<std::string, Identifier *> &Variables() {
-        static std::unordered_map<std::string, Identifier *> variables;
-        return variables;
+        DataType GetType(std::string val)
+        {
+            return DataType::String;
+        }
+
+        bool HasType(const Expression &e, DataType type)
+        {
+            return e.type == type;
+        }
+
+        bool SameType(const Expression &lhs, const Expression &rhs)
+        {
+            return lhs.type == rhs.type;
+        }
+        std::string ShowType(DataType type)
+        {
+            switch (type)
+            {
+            case DataType::None:
+                return "None";
+                break;
+            case DataType::String:
+                return "String";
+                break;
+            case DataType::Int:
+                return "Int";
+                break;
+            case DataType::Bool:
+                return "Bool";
+                break;
+            default:
+                llvm_unreachable("ShowType: unknown DataType!");
+                break;
+            }
+        }
     }
 
     Node::~Node() {}
 
-    DataType GetType(int val) {
-        return DataType::Int;
-    }
-
-    DataType GetType(bool val) {
-        return DataType::Bool;
-    }
-
-    DataType GetType(std::string val) {
-        return DataType::String;
-    }
-
-    bool HasType(const Expression &e, DataType type)
+    Identifier::Identifier(DataType type_, std::string name_) : name(std::move(name_))
     {
-        return e.type == type;
+        type = std::move(type_);
+        std::cerr << "Identifier " << name << " created" << '\n';
+
+        // Variables[name] = this;
+        std::cerr << "[Variables] <--- " << name << std::endl;
     }
 
-    bool SameType(const Expression &lhs, const Expression &rhs)
+    CodeBlock::CodeBlock(StatementList statements_) : statements(std::move(statements_))
     {
-        return lhs.type == rhs.type;
-    }
-
-    Identifier::Identifier(DataType type_, std::string name_) : name(std::move(name_)) {
-            type = std::move(type_);
-            std::cerr << "Identifier " << name << " created" << '\n';  
-
-            // Variables[name] = this;
-            std::cerr << "[Variables] <--- " << name << std::endl;
-    }
-
-    CodeBlock::CodeBlock(StatementList statements_) : statements(std::move(statements_)) {
         std::cerr << "_____CodeBlock created_____" << std::endl;
     }
 
     UnaryOp::UnaryOp(UnaryOpType op_, Expression &expr_) : op(op_), expr(expr_)
+    {
+        const char *errorMsg = "UnaryOp with wrong type";
+        switch (op)
         {
-            const char *errorMsg = "UnaryOp with wrong type";
-            switch (op)
+        case UnaryOpType::Minus:
+        {
+            type = DataType::Int;
+            if (!details::HasType(expr, DataType::Int))
             {
-                case UnaryOpType::Minus:
-                {
-                    type = DataType::Int;
-                    if (!HasType(expr, DataType::Int))
-                    {
-                        throw std::runtime_error(errorMsg);
-                    }
-                    break;
-                }
-                case UnaryOpType::Neg:
-                {
-                    type = DataType::Bool;
-                    if (!HasType(expr, DataType::Bool))
-                    {
-                        throw std::runtime_error(errorMsg);
-                    }
-                    break;
-                }
+                throw std::runtime_error(errorMsg);
             }
+            break;
+        }
+        case UnaryOpType::Neg:
+        {
+            type = DataType::Bool;
+            if (!details::HasType(expr, DataType::Bool))
+            {
+                throw std::runtime_error(errorMsg);
+            }
+            break;
+        }
+        }
+    }
+
+    BinaryOp::BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_) : op(op_), lhs(lhs_), rhs(rhs_)
+    {
+        const char *errorMsg = "BinOp with wrong types";
+
+        // type checking
+        switch (op)
+        {
+        case BinaryOpType::Pow:
+        case BinaryOpType::Mult:
+        case BinaryOpType::Div:
+        case BinaryOpType::Sub:
+        case BinaryOpType::Leq:
+        case BinaryOpType::Les:
+        case BinaryOpType::Geq:
+        case BinaryOpType::Gre:
+        {
+            if (!details::HasType(lhs, DataType::Int) || !details::HasType(rhs, DataType::Int))
+            {
+                throw std::runtime_error(errorMsg);
+            }
+            break;
+        }
+        case BinaryOpType::Sum:
+        {
+            bool bothInt = details::HasType(lhs, DataType::Int) && details::HasType(rhs, DataType::Int);
+            bool bothStr = details::HasType(lhs, DataType::String) && details::HasType(rhs, DataType::String);
+            if (!bothInt && !bothStr)
+            {
+                throw std::runtime_error(errorMsg);
+            }
+            break;
+        }
+        case BinaryOpType::Eq:
+        case BinaryOpType::Neq:
+        {
+            if (!details::SameType(lhs, rhs))
+            {
+                throw std::runtime_error(errorMsg);
+            }
+            break;
+        }
+        case BinaryOpType::And:
+        case BinaryOpType::Or:
+        {
+            if (!details::HasType(lhs, DataType::Bool) || !details::HasType(lhs, DataType::Bool))
+            {
+                throw std::runtime_error(errorMsg);
+            }
+            break;
+        }
+        default:
+            std::cerr << "Unknown BinOp\n";
         }
 
-        BinaryOp::BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_) : op(op_), lhs(lhs_), rhs(rhs_)
+        // calculating result type
+        switch (op)
         {
-            const char *errorMsg = "BinOp with wrong types";
-            switch (op)
-            {
-            case BinaryOpType::Pow:
-            case BinaryOpType::Mult:
-            case BinaryOpType::Div:
-            case BinaryOpType::Sub:
-            case BinaryOpType::Leq:
-            case BinaryOpType::Les:
-            case BinaryOpType::Geq:
-            case BinaryOpType::Gre:
-            {
-                if (!HasType(lhs, DataType::Int) || !HasType(rhs, DataType::Int))
-                {
-                    throw std::runtime_error(errorMsg);
-                }
-                break;
-            }
-            case BinaryOpType::Sum:
-            {
-                bool bothInt = HasType(lhs, DataType::Int) && HasType(rhs, DataType::Int);
-                bool bothStr = HasType(lhs, DataType::Int) && HasType(rhs, DataType::Int);
-                if (!bothInt && !bothStr)
-                {
-                    throw std::runtime_error(errorMsg);
-                }
-                break;
-            }
-            case BinaryOpType::Eq:
-            case BinaryOpType::Neq:
-            {
-                if (!SameType(lhs, rhs))
-                {
-                    throw std::runtime_error(errorMsg);
-                }
-                break;
-            }
-            case BinaryOpType::And:
-            case BinaryOpType::Or:
-            {
-                if (!HasType(lhs, DataType::Bool) || !HasType(lhs, DataType::Bool))
-                {
-                    throw std::runtime_error(errorMsg);
-                }
-                break;
-            }
-            default:
-                std::cerr << "Unknown BinOp\n";
-            }
+        case BinaryOpType::Pow:
+        case BinaryOpType::Mult:
+        case BinaryOpType::Div:
+        case BinaryOpType::Sub:
+        case BinaryOpType::Sum:
+        {
+            type = lhs.type;
+            assert(lhs.type == rhs.type);
+            break;
+        }
+        case BinaryOpType::Leq:
+        case BinaryOpType::Les:
+        case BinaryOpType::Geq:
+        case BinaryOpType::Gre:
+        case BinaryOpType::Eq:
+        case BinaryOpType::Neq:
+        case BinaryOpType::And:
+        case BinaryOpType::Or:
+        {
+            type = DataType::Bool;
+            break;
+        }
+        }
+    }
 
-            switch (op)
-            {
-            case BinaryOpType::Pow:
-            case BinaryOpType::Mult:
-            case BinaryOpType::Div:
-            case BinaryOpType::Sub:
-            case BinaryOpType::Sum:
-            {
-                type = DataType::Int;
-                break;
-            }
-            case BinaryOpType::Leq:
-            case BinaryOpType::Les:
-            case BinaryOpType::Geq:
-            case BinaryOpType::Gre:
-            case BinaryOpType::Eq:
-            case BinaryOpType::Neq:
-            case BinaryOpType::And:
-            case BinaryOpType::Or:
-            {
-                type = DataType::Bool;
-                break;
-            }
-            }
+    VarDecl::VarDecl(Identifier *ident_, Expression &expr_) : ident(ident_),
+                                                              expr(expr_)
+    {
+        if (ident == nullptr)
+        {
+            throw std::runtime_error("Nullptr ident in VarDecl");
         }
+        if (!details::SameType(*ident, expr))
+        {
+            throw std::runtime_error("Mismatched typed in VarDecl");
+        }
+    }
 
-        VarDecl::VarDecl(Identifier *ident_, Expression &expr_) : ident(ident_),
-                                                         expr(expr_)
-        {
-            if (ident == nullptr)
-            {
-                throw std::runtime_error("Nullptr ident in VarDecl");
-            }
-            if (!SameType(*ident, expr))
-            {
-                throw std::runtime_error("Mismatched typed in VarDecl");
-            }
-        }
 
-        VarAssign::VarAssign(std::string &ident_name, Expression &expr_) :
-                                                           expr(expr_)
+    VarAssign::VarAssign(Identifier *ident_, Expression &expr_) : expr(expr_),
+                                                                  ident(ident_)
+    {
+        if (ident == nullptr)
         {
-            ident = Variables()[ident_name];
-            if (ident == nullptr)
-            {
-                throw std::runtime_error("Nullptr ident in VarAssign");
-            }
-            if (!SameType(*ident, expr))
-            {
-                throw std::runtime_error("Mismatched typed in VarAssign");
-            }
-            std::cerr << ident_name << " assigned" << std::endl;
+            throw std::runtime_error("Nullptr ident in VarAssign");
         }
-        
-        WhileLoop::WhileLoop(Expression &expr_, CodeBlock code_block_) : expr(expr_),
-                                                              code_block(std::move(code_block_))
+        if (!details::SameType(*ident, expr))
         {
-            if (!HasType(expr, DataType::Bool))
-            {
-                throw std::runtime_error("Non-bool expr in WhileLoop");
-            }
-            std::cerr << "While cycle created" << std::endl;
+            throw std::runtime_error("Mismatched typed in VarAssign");
         }
+        std::cerr << ident->name << " assigned" << std::endl;
+    }
 
-        IfStatement::IfStatement(Expression &expr_, CodeBlock on_if_, std::optional<CodeBlock> on_else_) : expr(expr_),
-                                                                                              on_if(std::move(on_if_)),
-                                                                                              on_else(std::move(on_else_))
+    WhileLoop::WhileLoop(Expression &expr_, CodeBlock code_block_) : expr(expr_),
+                                                                     code_block(std::move(code_block_))
+    {
+        if (!details::HasType(expr, DataType::Bool))
         {
-            if (!HasType(expr, DataType::Bool))
-            {
-                throw std::runtime_error("Non-bool expr in WhileLoop");
-            }
-            std::cerr << "If statement created" << std::endl;
+            throw std::runtime_error("Non-bool expr in WhileLoop");
         }
+        std::cerr << "While cycle created" << std::endl;
+    }
+
+    IfStatement::IfStatement(Expression &expr_, CodeBlock on_if_, std::optional<CodeBlock> on_else_) : expr(expr_),
+                                                                                                       on_if(std::move(on_if_)),
+                                                                                                       on_else(std::move(on_else_))
+    {
+        if (!details::HasType(expr, DataType::Bool))
+        {
+            throw std::runtime_error("Non-bool expr in WhileLoop");
+        }
+        std::cerr << "If statement created" << std::endl;
+    }
 }

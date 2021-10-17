@@ -1,0 +1,17 @@
+{
+    "If and else Snippet": {
+      "prefix": "!ifls",
+      "body": [
+        "if () {",
+        "}",
+        "else {",
+        "}"
+      ],
+      "description": "css files for lf"
+    },
+    "React Bind Snippet": {
+      "prefix": "!bind",
+      "body": "this.${foo} = this.${foo}.bind(this)",
+      "description": "this binding for react"
+    }
+  }

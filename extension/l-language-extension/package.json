@@ -1,7 +1,7 @@
 {
-	"name": "lsp-sample",
-	"description": "A language server example",
-	"author": "Microsoft Corporation",
+	"name": "l-language-extension",
+	"description": "L-language extension",
+	"author": "-",
 	"license": "MIT",
 	"version": "1.0.0",
 	"repository": {
@@ -17,33 +17,27 @@
 		"vscode": "^1.43.0"
 	},
 	"activationEvents": [
-		"onLanguage:plaintext"
+		"onLanguage:L-language"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
-		"configuration": {
-			"type": "object",
-			"title": "Example configuration",
-			"properties": {
-				"languageServerExample.maxNumberOfProblems": {
-					"scope": "resource",
-					"type": "number",
-					"default": 100,
-					"description": "Controls the maximum number of problems produced by the server."
-				},
-				"languageServerExample.trace.server": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"off",
-						"messages",
-						"verbose"
-					],
-					"default": "off",
-					"description": "Traces the communication between VS Code and the language server."
-				}
-			}
-		}
+		"languages": [{
+            "id": "L-language",
+            "aliases": ["L-language", "l-lang"],
+            "extensions": [".lang"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "L-language",
+            "scopeName": "source.lang",
+            "path": "./syntaxes/l-lang.tmLanguage.json"
+        }],
+		"snippets": [
+            {
+                "language": "L-language",
+                "path": "./snippets/snippets.code-snippets"
+            }
+        ]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

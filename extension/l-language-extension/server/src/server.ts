@@ -195,7 +195,7 @@ connection.onCompletion(
 		return [
 			{
 				label: 'main',
-				kind: CompletionItemKind.Keyword,
+				kind: CompletionItemKind.Function,
 				data: 1
 			},
 			{
@@ -220,12 +220,12 @@ connection.onCompletion(
 			},
 			{
 				label: 'Int',
-				kind: CompletionItemKind.Keyword,
+				kind: CompletionItemKind.TypeParameter,
 				data: 6
 			},
 			{
 				label: 'Bool',
-				kind: CompletionItemKind.Keyword,
+				kind: CompletionItemKind.TypeParameter,
 				data: 7
 			},
 			{

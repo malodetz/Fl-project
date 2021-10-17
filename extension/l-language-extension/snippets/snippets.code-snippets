@@ -3,13 +3,11 @@
       "prefix": "!ifls",
       "body": [
         "if () {",
-        "",
         "}",
         "else {",
-        "",
         "}"
       ],
-      "description": "if statement with else branch"
+      "description": "css files for lf"
     },
     "React Bind Snippet": {
       "prefix": "!bind",

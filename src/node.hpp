@@ -23,7 +23,6 @@ namespace AST
 
     namespace details
     {
-        std::unordered_map<std::string, Identifier *> &Variables();
 
         DataType GetType(int val);
 
@@ -166,7 +165,7 @@ namespace AST
     {
         Identifier *ident;
         Expression &expr;
-        VarAssign(std::string &ident_name, Expression &expr_);
+        VarAssign(Identifier *ident_, Expression &expr_);
         virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
     };
 

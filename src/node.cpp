@@ -8,11 +8,6 @@ namespace AST
 {
     namespace details
     {
-        std::unordered_map<std::string, Identifier *> &Variables()
-        {
-            static std::unordered_map<std::string, Identifier *> variables;
-            return variables;
-        }
 
         DataType GetType(int val)
         {
@@ -128,7 +123,7 @@ namespace AST
         case BinaryOpType::Sum:
         {
             bool bothInt = details::HasType(lhs, DataType::Int) && details::HasType(rhs, DataType::Int);
-            bool bothStr = details::HasType(lhs, DataType::Int) && details::HasType(rhs, DataType::Int);
+            bool bothStr = details::HasType(lhs, DataType::String) && details::HasType(rhs, DataType::String);
             if (!bothInt && !bothStr)
             {
                 throw std::runtime_error(errorMsg);
@@ -166,7 +161,8 @@ namespace AST
         case BinaryOpType::Sub:
         case BinaryOpType::Sum:
         {
-            type = DataType::Int;
+            type = lhs.type;
+            assert(lhs.type == rhs.type);
             break;
         }
         case BinaryOpType::Leq:
@@ -197,9 +193,9 @@ namespace AST
         }
     }
 
-    VarAssign::VarAssign(std::string &ident_name, Expression &expr_) : expr(expr_)
+    VarAssign::VarAssign(Identifier *ident_, Expression &expr_) : expr(expr_),
+                                                                  ident(ident_)
     {
-        ident = details::Variables()[ident_name];
         if (ident == nullptr)
         {
             throw std::runtime_error("Nullptr ident in VarAssign");
@@ -208,7 +204,7 @@ namespace AST
         {
             throw std::runtime_error("Mismatched typed in VarAssign");
         }
-        std::cerr << ident_name << " assigned" << std::endl;
+        std::cerr << ident->name << " assigned" << std::endl;
     }
 
     WhileLoop::WhileLoop(Expression &expr_, CodeBlock code_block_) : expr(expr_),

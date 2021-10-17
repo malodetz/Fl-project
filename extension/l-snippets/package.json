@@ -1,0 +1,20 @@
+{
+    "name": "l-snippets",
+    "displayName": "L-snippets",
+    "description": "",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.61.0"
+    },
+    "categories": [
+        "Snippets"
+    ],
+    "contributes": {
+        "snippets": [
+            {
+                "language": "L-language",
+                "path": "./snippets/snippets.code-snippets"
+            }
+        ]
+    }
+}

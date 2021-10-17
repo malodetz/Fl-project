@@ -1,11 +1,14 @@
 {
-	"name": "lsp-for-l-language",
-	"description": "A language server for L language",
+	"name": "lsp-sample",
+	"description": "A language server example",
+	"author": "Microsoft Corporation",
+	"license": "MIT",
 	"version": "1.0.0",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/malodetz/Fl-project/"
+		"url": "https://github.com/Microsoft/vscode-extension-samples"
 	},
+	"publisher": "vscode-samples",
 	"categories": [],
 	"keywords": [
 		"multi-root ready"
@@ -14,7 +17,7 @@
 		"vscode": "^1.43.0"
 	},
 	"activationEvents": [
-		"onLanguage:l-lang"
+		"onLanguage:plaintext"
 	],
 	"main": "./client/out/extension",
 	"contributes": {

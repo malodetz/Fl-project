@@ -70,8 +70,6 @@ namespace AST
 
     static StatementList CurCodeBlock;
 
-    std::unordered_map<std::string, Identifier *> &Variables();
-
     struct Node
     {
         virtual ~Node();

@@ -29,6 +29,11 @@ parsingcontext::ParsingContext & parsingContext() {
     return ctx;
 }
 
+codegen::CodeGenContext & codegenContext() {
+    static codegen::CodeGenContext ctx;
+    return ctx;
+}  
+
 %}
 
 %union {
@@ -83,27 +88,27 @@ parsingcontext::ParsingContext & parsingContext() {
 start: MAIN LP RP code_block  {cout << "Main: " << endl;}
 
 code_block: LB statements_seq RB {
-    $$ = new AST::CodeBlock(AST::CurCodeBlock);
-    AST::CurCodeBlock.clear();
+    $$ = new AST::CodeBlock(parsingContext().GetBlockAndClear());
+    // AST::CurCodeBlock.clear();
 }
 
 statements_seq: statements_seq statement {}
 | statement {}
 
 statement: declaration {
-    AST::CurCodeBlock.push_back($1);
+    parsingContext().AddStatement($1);
 }
 | assignment {
-    AST::CurCodeBlock.push_back($1);
+    parsingContext().AddStatement($1);
 }
 | skip {
-    AST::CurCodeBlock.push_back($1);
+    parsingContext().AddStatement($1);
 }
 | if_statement {
-    AST::CurCodeBlock.push_back($1);
+    parsingContext().AddStatement($1);
 }
 | while_statement {
-    AST::CurCodeBlock.push_back($1);
+    parsingContext().AddStatement($1);
 }
 ;
 
@@ -198,10 +203,10 @@ EXPR : CONST { $$ = $1; }
 }
 ;
 
-CONST: INT { $$ = new AST::Constant($1); }
-| STRING { $$ = new AST::Constant(*$1); delete $1; }
-| TRUE_VAL { $$ = new AST::Constant($1); }
-| FALSE_VAL { $$ = new AST::Constant($1); }
+CONST: INT { $$ = new AST::ConstantInt($1); }
+| STRING { $$ = new AST::ConstantString(*$1); delete $1; }
+| TRUE_VAL { $$ = new AST::ConstantBool($1); }
+| FALSE_VAL { $$ = new AST::ConstantBool($1); }
 
 %%
 
@@ -211,6 +216,10 @@ int main(int argc, char* argv[])
     freopen(argv[1], "r", stdin);
     yyparse();
     fclose(stdin);
+
+    codegenContext().astBlock = new AST::CodeBlock(parsingContext().GetBlockAndClear());
+    codegenContext().generateCode();
+    codegenContext().runCode();
 
     return 0;
 }

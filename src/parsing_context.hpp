@@ -40,5 +40,9 @@ namespace parsingcontext {
             return std::exchange(curCodeBlock, {});
         }
 
+        void AddStatement(AST::Statement * stmt) {
+            curCodeBlock.push_back(stmt);
+        }
+
     };
 }

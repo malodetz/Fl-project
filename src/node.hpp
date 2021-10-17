@@ -68,7 +68,7 @@ namespace AST
         Or
     };
 
-    static StatementList CurCodeBlock;
+    // static StatementList CurCodeBlock;
 
     struct Node
     {
@@ -107,17 +107,51 @@ namespace AST
     // DataType GetType(bool val);
     // DataType GetType(std::string val);
 
-    template <class LiteralType>
-    struct Constant : Expression
+    // template <class LiteralType>
+    // struct Constant : Expression
+    // {
+    //     LiteralType val;
+    //     Constant(LiteralType val_) : val(val_)
+    //     {
+    //         type = details::GetType(val_);
+    //         std::cerr << "Constructed Constant: " << val_ << std::endl;
+    //     }
+    //     virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+    // };
+
+    struct ConstantInt : Expression
     {
-        LiteralType val;
-        Constant(LiteralType val_) : val(val_)
+        int val;
+        ConstantInt(int val_) : val(val_)
         {
-            type = details::GetType(val_);
+            type = DataType::Int;
             std::cerr << "Constructed Constant: " << val_ << std::endl;
         }
         virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
     };
+
+    struct ConstantString : Expression
+    {
+        std::string val;
+        ConstantString(std::string val_) : val(val_)
+        {
+            type = DataType::String;
+            std::cerr << "Constructed Constant: " << val_ << std::endl;
+        }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+    };
+
+    struct ConstantBool : Expression
+    {
+        bool val;
+        ConstantBool(bool val_) : val(val_)
+        {
+            type = DataType::Bool;
+            std::cerr << "Constructed Constant: " << val_ << std::endl;
+        }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+    };
+
 
     // Gonna find value in context
     struct Identifier : public Expression

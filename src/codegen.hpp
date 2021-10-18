@@ -1,4 +1,5 @@
 #pragma once
+
 #include "decl.hpp"
 
 #include <llvm/IR/Value.h>
@@ -12,23 +13,23 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace codegen
-{
-    struct CodeGenContext
-    {
+namespace codegen {
+    struct CodeGenContext {
 
         llvm::LLVMContext llvmCtx;
         llvm::Module *module;
-        llvm::IRBuilder<>* builder;
-        llvm::BasicBlock *basicBlock; // sequence of inst
+        llvm::IRBuilder<> *builder{};
+        llvm::BasicBlock *basicBlock{}; // sequence of inst
         std::unordered_map<std::string, llvm::Value *> variables;
         llvm::Function *mainFunction = nullptr;
         AST::CodeBlock *astBlock = nullptr; // ast is here
-        
+
 
         CodeGenContext();
+
         void generateCode();
-        llvm::GenericValue runCode();
+
+        llvm::GenericValue runCode() const;
         // llvm::GenericValue runCode();
     };
 

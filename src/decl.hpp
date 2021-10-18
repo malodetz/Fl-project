@@ -2,12 +2,10 @@
 
 #include <vector>
 
-namespace codegen
-{
+namespace codegen {
     struct CodeGenContext;
 }
-namespace AST
-{
+namespace AST {
     enum class DataType;
     enum class UnaryOpType;
     enum class BinaryOpType;
@@ -18,7 +16,7 @@ namespace AST
     struct CodeBlock;
 
     struct Identifier;
-    template <class T>
+    template<class T>
     struct Constant;
     struct UnaryOp;
     struct BinaryOp;

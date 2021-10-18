@@ -288,4 +288,45 @@ namespace AST
         return context.builder->CreateStore(expr_val, var, false);
     }
 
+    llvm::Value *IfStatement::CodeGen(codegen::CodeGenContext &context)
+    {
+        std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@Generating code for if statement...\n";
+        llvm::Value *cond_v = expr.CodeGen(context);
+        cond_v = context.builder->CreateFCmpONE(
+            cond_v, llvm::ConstantFP::get(context.llvmCtx, llvm::APFloat(0.0)), "ifcond");
+
+        llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context.llvmCtx, "then", context.mainFunction);
+        llvm::BasicBlock *elseBB = llvm::BasicBlock::Create(context.llvmCtx, "else");
+        llvm::BasicBlock *mergeBB = llvm::BasicBlock::Create(context.llvmCtx, "else");
+
+        context.builder->CreateCondBr(cond_v, thenBB, elseBB);
+
+        context.builder->SetInsertPoint(thenBB);
+        llvm::Value *thenGen = on_if.CodeGen(context);
+
+        context.builder->CreateBr(mergeBB);
+        thenBB = context.builder->GetInsertBlock();
+
+        context.mainFunction->getBasicBlockList().push_back(elseBB);
+        context.builder->SetInsertPoint(elseBB);
+
+        llvm::Value *elseGen = nullptr;
+        if (on_else)
+        {
+            llvm::Value *elseGen = on_else->CodeGen(context);
+        }
+        context.builder->CreateBr(mergeBB);
+        // Codegen of 'Else' can change the current block, update elseBB for the PHI.
+        elseBB = context.builder->GetInsertBlock();
+
+        // Emit merge block.
+        context.mainFunction->getBasicBlockList().push_back(mergeBB);
+        context.builder->SetInsertPoint(mergeBB);
+        llvm::PHINode *PN = context.builder->CreatePHI(llvm::Type::getDoubleTy(context.llvmCtx), 2, "iftmp");
+
+        PN->addIncoming(thenGen, thenBB);
+        PN->addIncoming(elseGen, elseBB);
+        return PN;
+    }
+
 }

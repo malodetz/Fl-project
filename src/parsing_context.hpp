@@ -5,12 +5,17 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <stack>
 
 namespace parsingcontext {
     struct ParsingContext {
         std::unordered_map<std::string, AST::Identifier *> variables;
-        AST::StatementList curCodeBlock;
+        std::stack<AST::StatementList> StackOfCodeBlocks;
     
+
+        ParsingContext() : StackOfCodeBlocks({AST::StatementList{}}) {
+            assert(StackOfCodeBlocks.size() == 1);
+        }
         AST::Identifier *loadIdent(const std::string &name)
         {
             auto resp = variables.find(name);
@@ -33,16 +38,18 @@ namespace parsingcontext {
             {
                 throw std::runtime_error("[Internal error] Trying to store an already storead value!");
             }
-            std::cout << "Before access htable:\n";
+            std::cout << "Before access";
             variables[name] = ident;
         }
 
         AST::StatementList GetBlockAndClear() {
-            return std::exchange(curCodeBlock, {});
+            auto resp = std::move(StackOfCodeBlocks.top());
+            StackOfCodeBlocks.pop();
+            return resp;;
         }
 
         void AddStatement(AST::Statement * stmt) {
-            curCodeBlock.push_back(stmt);
+            StackOfCodeBlocks.top().push_back(stmt);
         }
 
     };

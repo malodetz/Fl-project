@@ -21,23 +21,32 @@
 	],
 	"main": "./client/out/extension",
 	"contributes": {
-		"languages": [{
-            "id": "L-language",
-            "aliases": ["L-language", "l-lang"],
-            "extensions": [".lang"],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "L-language",
-            "scopeName": "source.lang",
-            "path": "./syntaxes/l-lang.tmLanguage.json"
-        }],
+		"languages": [
+			{
+				"id": "L-language",
+				"aliases": [
+					"L-language",
+					"l-lang"
+				],
+				"extensions": [
+					".lang"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "L-language",
+				"scopeName": "source.lang",
+				"path": "./syntaxes/l-lang.tmLanguage.json"
+			}
+		],
 		"snippets": [
-            {
-                "language": "L-language",
-                "path": "./snippets/snippets.code-snippets"
-            }
-        ]
+			{
+				"language": "L-language",
+				"path": "./snippets/snippets.code-snippets"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

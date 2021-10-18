@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <optional>
+#include <algorithm>
 
 
 using namespace std;
@@ -87,8 +88,8 @@ codegen::CodeGenContext & codegenContext() {
 %%
 start: main_debug MAIN LP RP code_block  {
     cout << "Main: " << endl;
-    // codegenContext().astBlock = $4;
-}
+    codegenContext().astBlock = $5;
+} 
 
 main_debug: {std::cerr << "main started\n"; }
 
@@ -99,6 +100,7 @@ code_block: registerBlock LB statements_seq RB {
         assert(!AST::StackOfStatements().empty());
         AST::StackOfStatements().pop();
     }
+    std::reverse(storage.begin(), storage.end());
     std::cerr << "CodeBlock successfully packed: size = " << storage.size() << std::endl;
     assert(!AST::CodeBlockStart().empty());
     AST::CodeBlockStart().pop();
@@ -280,8 +282,8 @@ int main(int argc, char* argv[])
         std::cout << e.what() << '\n';
         return 1;
     }
-    // codegenContext().generateCode();
-    // codegenContext().runCode();
+    codegenContext().generateCode();
+    codegenContext().runCode();
 
     return 0;
 }

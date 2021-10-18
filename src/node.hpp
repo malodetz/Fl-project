@@ -17,13 +17,17 @@
 #include <optional>
 #include <cassert>
 #include <unordered_map>
+#include <stack>
 
 namespace AST
 {
+    struct Statement;
+    std::stack<Statement *> &StackOfStatements();
+
+    std::stack<std::size_t> &CodeBlockStart();
 
     namespace details
     {
-
         DataType GetType(int val);
 
         DataType GetType(bool val);

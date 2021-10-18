@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <optional>
+#include <algorithm>
 
 
 using namespace std;
@@ -85,33 +86,72 @@ codegen::CodeGenContext & codegenContext() {
 %type <else_stmt> optional_else;
 
 %%
-start: MAIN LP RP code_block  {
+start: main_debug MAIN LP RP code_block  {
     cout << "Main: " << endl;
-    codegenContext().astBlock = $4;
+    codegenContext().astBlock = $5;
+} 
+
+main_debug: {std::cerr << "main started\n"; }
+
+code_block: registerBlock LB statements_seq RB {
+    AST::StatementList storage;
+    while (AST::StackOfStatements().size() != AST::CodeBlockStart().top()) {
+        storage.push_back(AST::StackOfStatements().top());
+        assert(!AST::StackOfStatements().empty());
+        AST::StackOfStatements().pop();
+    }
+    std::reverse(storage.begin(), storage.end());
+    std::cerr << "CodeBlock successfully packed: size = " << storage.size() << std::endl;
+    assert(!AST::CodeBlockStart().empty());
+    AST::CodeBlockStart().pop();
+    $$ = new AST::CodeBlock(storage);
+    // $$ = new AST::CodeBlock(parsingContext().GetBlockAndClear());
+    // AST::CurCodeBlock.clear();
 }
 
-code_block: LB statements_seq RB {
-    $$ = new AST::CodeBlock(parsingContext().GetBlockAndClear());
-    // AST::CurCodeBlock.clear();
+registerBlock: {
+    std::cerr << "Code Block Started" << std::endl;
+    AST::CodeBlockStart().push(AST::StackOfStatements().size());
+    std::cerr << "Code block start position = " << AST::CodeBlockStart().top() << std::endl;
 }
 
 statements_seq: statements_seq statement {}
 | statement {}
 
 statement: declaration {
-    parsingContext().AddStatement($1);
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+    // parsingContext().AddStatement($1);
 }
 | assignment {
-    parsingContext().AddStatement($1);
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+    // parsingContext().AddStatement($1);
 }
 | skip {
-    parsingContext().AddStatement($1);
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+    // parsingContext().AddStatement($1);
 }
 | if_statement {
-    parsingContext().AddStatement($1);
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+    // parsingContext().AddStatement($1);
 }
 | while_statement {
-    parsingContext().AddStatement($1);
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+    // parsingContext().AddStatement($1);
 }
 ;
 
@@ -138,21 +178,30 @@ assignment: VAR ASSIGN EXPR SEP {
     }
 }
 
-if_statement: IF LP EXPR RP code_block optional_else {
-    $$ = new AST::IfStatement(*$3, *$5, *$6);
+if_statement: if_debug IF LP EXPR RP code_block optional_else {
+    // $$ = new AST::IfStatement(*$3, *$5, *$6);
+    $$ = new AST::IfStatement(*$4, *$6, *$7);
 }
 
-optional_else: ELSE code_block {
-    $$ = new std::optional<AST::CodeBlock>{*$2};
+if_debug: { std::cerr << "If block started\n"; }
+
+optional_else: else_deb ELSE code_block {
+    // $$ = new std::optional<AST::CodeBlock>{*$2};
+    $$ = new std::optional<AST::CodeBlock>{*$3};
 }
 | {
     $$ = new std::optional<AST::CodeBlock>;
 }
 ;
 
-while_statement: WHILE LP EXPR RP code_block {
-    $$ = new AST::WhileLoop(*$3, *$5);
+else_deb: { std::cerr << "Else block started\n"; }
+
+while_statement: while_deb WHILE LP EXPR RP code_block {
+    // $$ = new AST::WhileLoop(*$3, *$5); 
+    $$ = new AST::WhileLoop(*$4, *$6);
 };
+
+while_deb: {std::cerr << "While block started\n"; }
 
 EXPR : CONST { $$ = $1; }
 | MINUS EXPR {

@@ -33,7 +33,7 @@ parsingcontext::ParsingContext & parsingContext() {
 codegen::CodeGenContext & codegenContext() {
     static codegen::CodeGenContext ctx;
     return ctx;
-}  
+}
 
 %}
 
@@ -73,7 +73,7 @@ codegen::CodeGenContext & codegenContext() {
 %left MUL DIV
 %right POW
 
-%type <vardecl> declaration; 
+%type <vardecl> declaration;
 %type <expr> EXPR;
 %type <type> type;
 %type <expr> CONST;
@@ -89,7 +89,7 @@ codegen::CodeGenContext & codegenContext() {
 start: main_debug MAIN LP RP code_block  {
     cout << "Main: " << endl;
     codegenContext().astBlock = $5;
-} 
+}
 
 main_debug: {std::cerr << "main started\n"; }
 
@@ -195,7 +195,7 @@ optional_else: else_deb ELSE code_block {
 else_deb: { std::cerr << "Else block started\n"; }
 
 while_statement: while_deb WHILE LP EXPR RP code_block {
-    // $$ = new AST::WhileLoop(*$3, *$5); 
+    // $$ = new AST::WhileLoop(*$3, *$5);
     $$ = new AST::WhileLoop(*$4, *$6);
 };
 
@@ -205,10 +205,10 @@ EXPR : CONST { $$ = $1; }
 | MINUS EXPR {
     $$ = new AST::UnaryOp(AST::UnaryOpType::Minus, *$2);
 }
-| VAR { 
+| VAR {
     std::cerr << "Looking for variable: " << *$1 << std::endl;
     // AST::PrintVarDict();
-    $$ = parsingContext().loadIdent(*$1); 
+    $$ = parsingContext().loadIdent(*$1);
     if ($$ == nullptr) {
         throw std::runtime_error("Unknown variable!");
     }
@@ -275,14 +275,25 @@ int main(int argc, char* argv[])
         freopen(argv[1], "r", stdin);
         yyparse();
         fclose(stdin);
-    }
-    catch(std::exception & e) {
+    } catch(std::exception & e) {
         std::cout << e.what() << '\n';
         return 1;
     }
+
     codegenContext().generateCode();
-    codegenContext().saveCode();
-    codegenContext().runCode();
+
+    if (argc > 2){
+        if (std::string(argv[2]) == "--code"){
+            codegenContext().saveCode();
+        } else if (std::string(argv[2]) == "--bin"){
+            codegenContext().saveCode(true);
+        } else if (std::string(argv[2]) == "--exec"){
+            codegenContext().runCode();
+        } else{
+            std::cerr << "Unknow key: " << argv[2] << std::endl;
+            return 1;
+        }
+    }
 
     return 0;
 }

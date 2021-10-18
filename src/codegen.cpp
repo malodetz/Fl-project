@@ -305,7 +305,7 @@ namespace AST {
         assert(end_cond_v);
 
         end_cond_v = context.builder->CreateICmpNE(
-            end_cond_v, context.builder->getInt1(false), "loopcond");
+                end_cond_v, context.builder->getInt1(false), "loopcond");
 
         assert(end_cond_v);
 

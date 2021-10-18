@@ -6,6 +6,16 @@
 
 namespace AST
 {
+    std::stack<Statement *> &StackOfStatements() {
+        static std::stack<Statement *> statements;
+        return statements;
+    }
+
+    std::stack<std::size_t> &CodeBlockStart() {
+            static std::stack<std::size_t> levelStack;
+            return levelStack;
+    }
+
     namespace details
     {
 

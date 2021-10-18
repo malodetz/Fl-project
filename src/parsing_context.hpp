@@ -38,7 +38,7 @@ namespace parsingcontext {
             {
                 throw std::runtime_error("[Internal error] Trying to store an already storead value!");
             }
-            std::cout << "Before access";
+            std::cout << "Before access" << std::endl;
             variables[name] = ident;
         }
 

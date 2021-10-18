@@ -281,6 +281,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     codegenContext().generateCode();
+    codegenContext().saveCode();
     codegenContext().runCode();
 
     return 0;

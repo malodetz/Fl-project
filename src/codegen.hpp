@@ -29,8 +29,9 @@ namespace codegen {
 
         void generateCode();
 
+        void saveCode(bool isBinary = false) const;
+
         llvm::GenericValue runCode() const;
-        // llvm::GenericValue runCode();
     };
 
 } // namespace codegen

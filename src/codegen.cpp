@@ -11,10 +11,12 @@
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/Operator.h>
+#include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/raw_os_ostream.h>
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <cassert>
 #include <unordered_map>
@@ -33,7 +35,7 @@ namespace codegen {
 
         llvm::FunctionType *ftype = llvm::FunctionType::get(llvm::Type::getVoidTy(llvmCtx),
                                                             llvm::makeArrayRef(argTypes), false);
-        mainFunction = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, "main", module);
+        mainFunction = llvm::Function::Create(ftype, llvm::GlobalValue::ExternalLinkage, "main", module);
         basicBlock = llvm::BasicBlock::Create(llvmCtx, "entry", mainFunction);
         builder->SetInsertPoint(basicBlock);
 
@@ -62,6 +64,20 @@ namespace codegen {
         std::cout << "Code was run.\n";
         return {};
     }
+
+    void CodeGenContext::saveCode(bool isBinary) const {
+        if (isBinary) {
+            std::ofstream bit_file("lol.bc", std::ios_base::binary);
+            llvm::raw_os_ostream bit_write(bit_file);
+            WriteBitcodeToFile(*module, bit_write);
+        } else {
+            std::ofstream text_file("lol.ll", std::ios_base::out);
+            llvm::raw_os_ostream text_write(text_file);
+            module->print(text_write, nullptr);
+        }
+    }
+
+
 }
 
 namespace {

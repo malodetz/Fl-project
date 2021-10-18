@@ -185,7 +185,7 @@ namespace AST
         Expression &expr;
         CodeBlock code_block;
         WhileLoop(Expression &expr_, CodeBlock code_block_);
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
     struct IfStatement : Statement

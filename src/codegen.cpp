@@ -95,15 +95,14 @@ namespace AST
     llvm::Value *CodeBlock::CodeGen(codegen::CodeGenContext &context)
     {
         std::cout << "Generating block...\n";
-        // llvm::Value *last = nullptr;
+        llvm::Value *last = nullptr;
         int i = 0;
         for (auto &st : statements)
         {
             std::cout << ++i << " statement:\n";
-            st->CodeGen(context);
+            last = st->CodeGen(context);
         }
-        // return last;
-        return nullptr;
+        return context.builder->getInt1(true);
     }
 
     // expressions
@@ -256,13 +255,13 @@ namespace AST
             return context.builder->CreateOr(lhs_v, rhs_v);
         }
         }
-        return nullptr;
+        throw std::runtime_error("Unknown bin op!");
     }
 
     // statements
     llvm::Value *Skip::CodeGen(codegen::CodeGenContext &context)
     {
-        return nullptr;
+        return context.builder->getInt1(true);
     }
 
     llvm::Value *VarDecl::CodeGen(codegen::CodeGenContext &context)
@@ -292,12 +291,12 @@ namespace AST
     {
         std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@Generating code for if statement...\n";
         llvm::Value *cond_v = expr.CodeGen(context);
-        cond_v = context.builder->CreateFCmpONE(
-            cond_v, llvm::ConstantFP::get(context.llvmCtx, llvm::APFloat(0.0)), "ifcond");
+        cond_v = context.builder->CreateICmpEQ(
+            cond_v, context.builder->getInt1(true), "ifcond");
 
         llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context.llvmCtx, "then", context.mainFunction);
         llvm::BasicBlock *elseBB = llvm::BasicBlock::Create(context.llvmCtx, "else");
-        llvm::BasicBlock *mergeBB = llvm::BasicBlock::Create(context.llvmCtx, "else");
+        llvm::BasicBlock *mergeBB = llvm::BasicBlock::Create(context.llvmCtx, "merge");
 
         context.builder->CreateCondBr(cond_v, thenBB, elseBB);
 
@@ -311,10 +310,23 @@ namespace AST
         context.builder->SetInsertPoint(elseBB);
 
         llvm::Value *elseGen = nullptr;
+
+        static int cnt = 0;
+        std::cerr << ++cnt << " -------------- IN codegen of IF INSTR\n";
+
         if (on_else)
         {
-            llvm::Value *elseGen = on_else->CodeGen(context);
+            
+            elseGen = on_else->CodeGen(context);
+            
+            assert(elseGen);
+            std::cout << "Generated else! " << intptr_t(elseGen) << std::endl;
         }
+        else {
+            std::cout << "Outside of on_else" << std::endl;
+        }
+        std::cout << "B4 assert: " << intptr_t(elseGen) << std::endl;
+        assert(elseGen);
         context.builder->CreateBr(mergeBB);
         // Codegen of 'Else' can change the current block, update elseBB for the PHI.
         elseBB = context.builder->GetInsertBlock();
@@ -322,7 +334,12 @@ namespace AST
         // Emit merge block.
         context.mainFunction->getBasicBlockList().push_back(mergeBB);
         context.builder->SetInsertPoint(mergeBB);
-        llvm::PHINode *PN = context.builder->CreatePHI(llvm::Type::getDoubleTy(context.llvmCtx), 2, "iftmp");
+        llvm::PHINode *PN = context.builder->CreatePHI(context.builder->getInt1Ty(), 2, "iftmp");
+
+        assert(thenGen);
+        assert(elseGen);
+        assert(thenBB);
+        assert(elseBB);
 
         PN->addIncoming(thenGen, thenBB);
         PN->addIncoming(elseGen, elseBB);

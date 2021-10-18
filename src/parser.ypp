@@ -105,8 +105,6 @@ code_block: registerBlock LB statements_seq RB {
     assert(!AST::CodeBlockStart().empty());
     AST::CodeBlockStart().pop();
     $$ = new AST::CodeBlock(storage);
-    // $$ = new AST::CodeBlock(parsingContext().GetBlockAndClear());
-    // AST::CurCodeBlock.clear();
 }
 
 registerBlock: {

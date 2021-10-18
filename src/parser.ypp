@@ -15,7 +15,7 @@ using namespace std;
 extern int yylex();
 
 int yyerror(const char *p) {
-    cerr << "Error! Unexpected token " << p << endl;
+    throw std::runtime_error(std::string("Error! ") + p);
     return 1;
 }
 
@@ -85,7 +85,10 @@ codegen::CodeGenContext & codegenContext() {
 %type <else_stmt> optional_else;
 
 %%
-start: MAIN LP RP code_block  {cout << "Main: " << endl;}
+start: MAIN LP RP code_block  {
+    cout << "Main: " << endl;
+    codegenContext().astBlock = $4;
+}
 
 code_block: LB statements_seq RB {
     $$ = new AST::CodeBlock(parsingContext().GetBlockAndClear());
@@ -121,6 +124,7 @@ declaration: type VAR ASSIGN EXPR SEP {
     std::cerr << "id = " << intptr_t(id) << '\n';
     parsingContext().storeIdent(id->name, id);
     $$ = new AST::VarDecl(id, *$4);
+
 }
 
 type: INT_TYPE { $$ = AST::DataType::Int; }
@@ -129,6 +133,9 @@ type: INT_TYPE { $$ = AST::DataType::Int; }
 
 assignment: VAR ASSIGN EXPR SEP {
     $$ = new AST::VarAssign(parsingContext().loadIdent(*$1), *$3);
+    if ($$ == nullptr) {
+        throw std::runtime_error("Unknown variable!");
+    }
 }
 
 if_statement: IF LP EXPR RP code_block optional_else {
@@ -155,12 +162,16 @@ EXPR : CONST { $$ = $1; }
     std::cerr << "Looking for variable: " << *$1 << std::endl;
     // AST::PrintVarDict();
     $$ = parsingContext().loadIdent(*$1); 
+    if ($$ == nullptr) {
+        throw std::runtime_error("Unknown variable!");
+    }
 }
 | LP EXPR RP {
     $$ = $2;
 }
 | EXPR PLUS  EXPR {
     $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Sum, *$3);
+    std::cout << "expr + expr << \n";
 }
 | EXPR MINUS EXPR {
     $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Sub, *$3);
@@ -213,11 +224,14 @@ CONST: INT { $$ = new AST::ConstantInt($1); }
 
 int main(int argc, char* argv[])
 {
-    freopen(argv[1], "r", stdin);
-    yyparse();
-    fclose(stdin);
-
-    codegenContext().astBlock = new AST::CodeBlock(parsingContext().GetBlockAndClear());
+    try {
+        freopen(argv[1], "r", stdin);
+        yyparse();
+        fclose(stdin);
+    }
+    catch(std::exception & e) {
+        std::cout << e.what() << '\n';
+    }
     codegenContext().generateCode();
     codegenContext().runCode();
 

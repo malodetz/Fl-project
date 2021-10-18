@@ -58,6 +58,7 @@ namespace AST
 
     Node::~Node() {}
 
+
     Identifier::Identifier(DataType type_, std::string name_) : name(std::move(name_))
     {
         type = std::move(type_);

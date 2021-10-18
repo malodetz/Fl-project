@@ -7,27 +7,27 @@ BUILDDIR = build
 
 OBJS = $(BUILDDIR)/parser.o $(BUILDDIR)/lexer.o  ${BUILDDIR}/node.o ${BUILDDIR}/codegen.o
 
-all: $(BUILDDIR)/parser
+all: $(BUILDDIR)/lol-compiler
 
 clean:
 	$(RM) -rf $(OBJS)
 
-parser.cpp: parser.ypp
+src/parser.cpp: src/parser.ypp
 	bison -d -o $@ $^
 
-parser.hpp: parser.cpp 
+src/parser.hpp: src/parser.cpp
 
-lexer.cpp: lexer.l parser.hpp 
+src/lexer.cpp: src/lexer.l src/parser.hpp
 	flex -o $@ $^
 
-node.cpp: node.hpp decl.hpp
+src/node.cpp: src/node.hpp src/decl.hpp
 
-codegen.cpp: node.hpp decl.hpp codegen.hpp
+src/codegen.cpp: src/node.hpp src/decl.hpp src/codegen.hpp
 
-$(BUILDDIR)/%.o: %.cpp 
+$(BUILDDIR)/%.o: src/%.cpp
 	g++ -c $< ${CPPFLAGS} -o $@ 
 
-$(BUILDDIR)/parser: $(OBJS)
+$(BUILDDIR)/lol-compiler: $(OBJS)
 	g++ -o $@ $(OBJS) $(LIBS) $(LDFLAGS)
 
 

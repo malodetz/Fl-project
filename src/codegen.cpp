@@ -20,6 +20,9 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <unordered_map>
+
+using GlobalStringPool = std::unordered_map<std::string, llvm::Value *>;
 
 namespace codegen
 {
@@ -40,7 +43,6 @@ namespace codegen
         builder->SetInsertPoint(basicBlock);
 
         assert(astBlock);
-
 
         std::cout << "AST block size = " << astBlock->statements.size() << '\n';
 
@@ -93,14 +95,15 @@ namespace AST
     llvm::Value *CodeBlock::CodeGen(codegen::CodeGenContext &context)
     {
         std::cout << "Generating block...\n";
-        llvm::Value * last = nullptr;
+        // llvm::Value *last = nullptr;
         int i = 0;
         for (auto &st : statements)
         {
             std::cout << ++i << " statement:\n";
-            last = st->CodeGen(context);
+            st->CodeGen(context);
         }
-        return last;
+        // return last;
+        return nullptr;
     }
 
     // expressions
@@ -116,20 +119,157 @@ namespace AST
         return context.builder->getInt1(val);
     }
 
+    llvm::Value *ConstantString::CodeGen(codegen::CodeGenContext &context)
+    {
+        std::cout << "Generating constant string...\n";
+
+        static GlobalStringPool globs;
+        auto iter = globs.find(val);
+        if (iter == globs.end())
+        {
+            iter = globs.emplace(val, context.builder->CreateGlobalString(val.c_str())).first;
+        }
+
+        return iter->second;
+    }
+
     llvm::Value *Identifier::CodeGen(codegen::CodeGenContext &context)
     {
+        if (context.variables.find(name) != context.variables.end())
+        {
+            std::cout << "Extracting " << name << "...\n";
+            return context.builder->CreateLoad(context.variables[name]);
+        }
         std::cout << "Generating Ident with name \"" << name << "\"...\n";
         llvm::AllocaInst *alloca = context.builder->CreateAlloca(getType(this, context.llvmCtx), nullptr, name.c_str());
         context.variables[name] = alloca;
         return alloca;
     }
 
+    // NOTE: type checking done during ast building
+    llvm::Value *UnaryOp::CodeGen(codegen::CodeGenContext &context)
+    {
+        std::cout << "Generating unary op...\n";
+        llvm::Value *expr_v = expr.CodeGen(context);
+        switch (op)
+        {
+        case AST::UnaryOpType::Minus:
+        case AST::UnaryOpType::Neg:
+        {
+            return context.builder->CreateNeg(expr_v);
+
+            break;
+        }
+        }
+        return nullptr;
+    }
+
+    // NOTE: type checking done during ast building
+    llvm::Value *BinaryOp::CodeGen(codegen::CodeGenContext &context)
+    {
+        std::cout << "Generating binary op...\n";
+        llvm::Value *lhs_v = lhs.CodeGen(context);
+        llvm::Value *rhs_v = rhs.CodeGen(context);
+        assert(lhs_v);
+        assert(rhs_v);
+        switch (op)
+        {
+        case BinaryOpType::Pow:
+        {
+            // TODO change, now is right assoc mult
+            return context.builder->CreateMul(lhs_v, rhs_v);
+        }
+        // for ints
+        case BinaryOpType::Mult:
+        {
+            return context.builder->CreateMul(lhs_v, rhs_v);
+        }
+        case BinaryOpType::Div:
+        {
+            return context.builder->CreateUDiv(lhs_v, rhs_v);
+        }
+        case BinaryOpType::Sub:
+        {
+            return context.builder->CreateSub(lhs_v, rhs_v);
+        }
+        case BinaryOpType::Leq:
+        {
+            return context.builder->CreateICmpSLE(lhs_v, rhs_v);
+        }
+        case BinaryOpType::Les:
+        {
+            return context.builder->CreateICmpSLT(lhs_v, rhs_v);
+        }
+        case BinaryOpType::Geq:
+        {
+            return context.builder->CreateICmpSGE(lhs_v, rhs_v);
+        }
+        case BinaryOpType::Gre:
+        {
+            return context.builder->CreateICmpSGT(lhs_v, rhs_v);
+        }
+
+        case BinaryOpType::Sum:
+        {
+            if (lhs.type == DataType::String)
+            {
+                throw std::runtime_error("[internal error] Concat is not supported");
+            }
+            return context.builder->CreateAdd(lhs_v, rhs_v);
+        }
+
+        // all
+        case BinaryOpType::Eq:
+        {
+            if (lhs.type == DataType::Int || lhs.type == DataType::Bool)
+            {
+                return context.builder->CreateICmpEQ(lhs_v, rhs_v);
+            }
+            else
+            {
+                auto *casted_l = context.builder->CreatePtrToInt(lhs_v, context.builder->getInt32Ty());
+                auto *casted_r = context.builder->CreatePtrToInt(rhs_v, context.builder->getInt32Ty());
+                return context.builder->CreateICmpEQ(casted_l, casted_r);
+            }
+        }
+
+        case BinaryOpType::Neq:
+        {
+            if (lhs.type == DataType::Int || lhs.type == DataType::Bool)
+            {
+                return context.builder->CreateICmpNE(lhs_v, rhs_v);
+            }
+            else
+            {
+                auto *casted_l = context.builder->CreatePtrToInt(lhs_v, context.builder->getInt32Ty());
+                auto *casted_r = context.builder->CreatePtrToInt(rhs_v, context.builder->getInt32Ty());
+                return context.builder->CreateICmpNE(casted_l, casted_r);
+            }
+        }
+        // bool
+        case BinaryOpType::And:
+        {
+            return context.builder->CreateAnd(lhs_v, rhs_v);
+        }
+        case BinaryOpType::Or:
+        {
+            return context.builder->CreateOr(lhs_v, rhs_v);
+        }
+        }
+        return nullptr;
+    }
+
     // statements
+    llvm::Value *Skip::CodeGen(codegen::CodeGenContext &context)
+    {
+        return nullptr;
+    }
+
     llvm::Value *VarDecl::CodeGen(codegen::CodeGenContext &context)
     {
         std::cout << "Generating declaration for " << ident->name << "...\n";
         ident->CodeGen(context);
-        
+
         VarAssign va(ident, expr);
         return va.CodeGen(context);
     }
@@ -144,7 +284,8 @@ namespace AST
         }
         llvm::Value *var = iter->second;
         llvm::Value *expr_val = expr.CodeGen(context);
-        
+
         return context.builder->CreateStore(expr_val, var, false);
     }
+
 }

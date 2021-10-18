@@ -33,7 +33,8 @@ namespace parsingcontext {
             {
                 throw std::runtime_error("[Internal error] Trying to store an already storead value!");
             }
-            variables[std::move(name)] = ident;
+            std::cout << "Before access htable:\n";
+            variables[name] = ident;
         }
 
         AST::StatementList GetBlockAndClear() {

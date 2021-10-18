@@ -80,12 +80,12 @@ namespace AST
     struct Expression : Node
     {
         DataType type;
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { std::cout << "Expression base class\n"; return nullptr; }
     };
 
     struct Statement : Node
     {
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { std::cout << "Statement base class\n"; return nullptr; }
     };
 
     struct CodeBlock : Node
@@ -106,7 +106,7 @@ namespace AST
         virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
-    struct ConstantString : Expression // TODO
+    struct ConstantString : Expression 
     {
         std::string val;
         ConstantString(std::string val_) : val(val_)
@@ -114,7 +114,7 @@ namespace AST
             type = DataType::String;
             std::cerr << "Constructed Constant: " << val_ << std::endl;
         }
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
     struct ConstantBool : Expression
@@ -141,7 +141,7 @@ namespace AST
         UnaryOpType op;
         Expression &expr;
         UnaryOp(UnaryOpType op_, Expression &expr_);
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
     struct BinaryOp : public Expression
@@ -150,14 +150,14 @@ namespace AST
         Expression &lhs;
         Expression &rhs;
         BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_);
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
     // Kinds of statement
 
     struct Skip : Statement
     {
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
     struct VarDecl : Statement
@@ -181,6 +181,7 @@ namespace AST
         Expression &expr;
         CodeBlock code_block;
         WhileLoop(Expression &expr_, CodeBlock code_block_);
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
     };
 
     struct IfStatement : Statement
@@ -189,6 +190,7 @@ namespace AST
         CodeBlock on_if;
         std::optional<CodeBlock> on_else;
         IfStatement(Expression &expr_, CodeBlock on_if_, std::optional<CodeBlock> on_else_);
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
     };
 
 }

@@ -1,0 +1,287 @@
+%{
+#include "node.hpp"
+#include "codegen.hpp"
+#include "parsing_context.hpp"
+
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <cassert>
+#include <optional>
+#include <algorithm>
+
+
+using namespace std;
+
+extern int yylex();
+
+int yyerror(const char *p) {
+    throw std::runtime_error(std::string("Error! ") + p);
+    return 1;
+}
+
+// codegen::CodeGenContext & codegenContext() {
+//     static codegen::CodeGenContext ctx;
+//     return ctx;
+// }
+
+parsingcontext::ParsingContext & parsingContext() {
+    static parsingcontext::ParsingContext ctx;
+    return ctx;
+}
+
+codegen::CodeGenContext & codegenContext() {
+    static codegen::CodeGenContext ctx;
+    return ctx;
+}  
+
+%}
+
+%union {
+    std::string *word;
+    char sym;
+    int num;
+    bool boolean;
+    AST::VarDecl *vardecl;
+    AST::Identifier *ident;
+    AST::Expression *expr;
+    AST::DataType type;
+    AST::VarAssign *varassign;
+    AST::WhileLoop *whileloop;
+    AST::CodeBlock *codeblock;
+    AST::Statement *statement;
+    AST::Skip *skip;
+    AST::IfStatement *if_stmt;
+    std::optional<AST::CodeBlock> *else_stmt;
+}
+
+%token <word> MAIN IF ELSE WHILE SKIP
+%token <word> INT_TYPE BOOL_TYPE STRING_TYPE
+%token <word> VAR
+%token <word> STRING
+%token <sym> SEP LP RP LB RB ASSIGN
+%token <sym> PLUS MINUS MUL DIV POW
+%token <word> EQ NEQ LT LE GT GE NOT AND OR
+%token <num> INT
+%token <boolean> TRUE_VAL FALSE_VAL
+
+%left OR
+%left AND
+%left NOT
+%nonassoc EQ NEQ LT LE GT GE
+%left PLUS MINUS
+%left MUL DIV
+%right POW
+
+%type <vardecl> declaration; 
+%type <expr> EXPR;
+%type <type> type;
+%type <expr> CONST;
+%type <varassign> assignment;
+%type <whileloop> while_statement;
+%type <codeblock> code_block;
+%type <statement> statement;
+%type <skip> skip;
+%type <if_stmt> if_statement;
+%type <else_stmt> optional_else;
+
+%%
+start: main_debug MAIN LP RP code_block  {
+    cout << "Main: " << endl;
+    codegenContext().astBlock = $5;
+} 
+
+main_debug: {std::cerr << "main started\n"; }
+
+code_block: registerBlock LB statements_seq RB {
+    AST::StatementList storage;
+    while (AST::StackOfStatements().size() != AST::CodeBlockStart().top()) {
+        storage.push_back(AST::StackOfStatements().top());
+        assert(!AST::StackOfStatements().empty());
+        AST::StackOfStatements().pop();
+    }
+    std::reverse(storage.begin(), storage.end());
+    std::cerr << "CodeBlock successfully packed: size = " << storage.size() << std::endl;
+    assert(!AST::CodeBlockStart().empty());
+    AST::CodeBlockStart().pop();
+    $$ = new AST::CodeBlock(storage);
+}
+
+registerBlock: {
+    std::cerr << "Code Block Started" << std::endl;
+    AST::CodeBlockStart().push(AST::StackOfStatements().size());
+    std::cerr << "Code block start position = " << AST::CodeBlockStart().top() << std::endl;
+}
+
+statements_seq: statements_seq statement {}
+| statement {}
+
+statement: declaration {
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+    // parsingContext().AddStatement($1);
+}
+| assignment {
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+    // parsingContext().AddStatement($1);
+}
+| skip {
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+    // parsingContext().AddStatement($1);
+}
+| if_statement {
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+    // parsingContext().AddStatement($1);
+}
+| while_statement {
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+    // parsingContext().AddStatement($1);
+}
+;
+
+skip: SKIP SEP {
+    $$ = new AST::Skip;
+}
+
+declaration: type VAR ASSIGN EXPR SEP {
+    AST::Identifier *id = new AST::Identifier($1, *$2); delete $2;
+    std::cerr << "id = " << intptr_t(id) << '\n';
+    parsingContext().storeIdent(id->name, id);
+    $$ = new AST::VarDecl(id, *$4);
+
+}
+
+type: INT_TYPE { $$ = AST::DataType::Int; }
+| BOOL_TYPE { $$ = AST::DataType::Bool; }
+| STRING_TYPE { $$ = AST::DataType::String; }
+
+assignment: VAR ASSIGN EXPR SEP {
+    $$ = new AST::VarAssign(parsingContext().loadIdent(*$1), *$3);
+    if ($$ == nullptr) {
+        throw std::runtime_error("Unknown variable!");
+    }
+}
+
+if_statement: if_debug IF LP EXPR RP code_block optional_else {
+    // $$ = new AST::IfStatement(*$3, *$5, *$6);
+    $$ = new AST::IfStatement(*$4, *$6, *$7);
+}
+
+if_debug: { std::cerr << "If block started\n"; }
+
+optional_else: else_deb ELSE code_block {
+    // $$ = new std::optional<AST::CodeBlock>{*$2};
+    $$ = new std::optional<AST::CodeBlock>{*$3};
+}
+| {
+    $$ = new std::optional<AST::CodeBlock>;
+}
+;
+
+else_deb: { std::cerr << "Else block started\n"; }
+
+while_statement: while_deb WHILE LP EXPR RP code_block {
+    // $$ = new AST::WhileLoop(*$3, *$5); 
+    $$ = new AST::WhileLoop(*$4, *$6);
+};
+
+while_deb: {std::cerr << "While block started\n"; }
+
+EXPR : CONST { $$ = $1; }
+| MINUS EXPR {
+    $$ = new AST::UnaryOp(AST::UnaryOpType::Minus, *$2);
+}
+| VAR { 
+    std::cerr << "Looking for variable: " << *$1 << std::endl;
+    // AST::PrintVarDict();
+    $$ = parsingContext().loadIdent(*$1); 
+    if ($$ == nullptr) {
+        throw std::runtime_error("Unknown variable!");
+    }
+}
+| LP EXPR RP {
+    $$ = $2;
+}
+| EXPR PLUS  EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Sum, *$3);
+    std::cout << "expr + expr << \n";
+}
+| EXPR MINUS EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Sub, *$3);
+}
+| EXPR MUL   EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Mult, *$3);
+}
+| EXPR DIV   EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Div, *$3);
+}
+| EXPR POW   EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Pow, *$3);
+}
+| NOT EXPR {
+    $$ = new AST::UnaryOp(AST::UnaryOpType::Neg, *$2);
+}
+| EXPR AND EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::And, *$3);
+}
+| EXPR OR EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Or, *$3);
+}
+| EXPR EQ EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Eq, *$3);
+}
+| EXPR NEQ EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Neq, *$3);
+}
+| EXPR LE EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Leq, *$3);
+}
+| EXPR LT EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Les, *$3);
+}
+| EXPR GE EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Geq, *$3);
+}
+| EXPR GT EXPR {
+    $$ = new AST::BinaryOp(*$1, AST::BinaryOpType::Gre, *$3);
+}
+;
+
+CONST: INT { $$ = new AST::ConstantInt($1); }
+| STRING { $$ = new AST::ConstantString(*$1); delete $1; }
+| TRUE_VAL { $$ = new AST::ConstantBool($1); }
+| FALSE_VAL { $$ = new AST::ConstantBool($1); }
+
+%%
+
+
+int main(int argc, char* argv[])
+{
+    try {
+        freopen(argv[1], "r", stdin);
+        yyparse();
+        fclose(stdin);
+    }
+    catch(std::exception & e) {
+        std::cout << e.what() << '\n';
+        return 1;
+    }
+    codegenContext().generateCode();
+    codegenContext().runCode();
+
+    return 0;
+}

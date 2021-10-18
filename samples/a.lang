@@ -3,22 +3,13 @@ main(){
     if (x >= 7 || x != 4){
         String y = 'a';
     }else{
-        String y = "b" + "c";
+        String tmp = "abobus";
     }
 
     Int z = 2;
     Bool flag = True;
     while (flag != False){
-        z = z + x;
-        Int a = x / z;
-        Int b = x * y;
+        z = z - x;
         flag = !(z > 1 && z<1) || (z==8); //Update flag
-    }
-    while (True){
-        skip;
-    }
-
-    if (y==2){
-        skip;
     }
 }

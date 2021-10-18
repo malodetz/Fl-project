@@ -121,13 +121,13 @@ namespace AST {
     llvm::Value *ConstantString::CodeGen(codegen::CodeGenContext &context) {
         std::cout << "Generating constant string...\n";
 
-        static GlobalStringPool globs;
-        auto iter = globs.find(val);
-        if (iter == globs.end()) {
-            iter = globs.emplace(val, context.builder->CreateGlobalString(val)).first;
-        }
+//        static GlobalStringPool globs;
+//        auto iter = globs.find(val);
+//        if (iter == globs.end()) {
+//            iter = globs.emplace(val, context.builder->CreateGlobalString(val)).first;
+//        }
 
-        return iter->second;
+        return context.builder->CreateGlobalStringPtr(llvm::StringRef(val));;
     }
 
     llvm::Value *Identifier::CodeGen(codegen::CodeGenContext &context) {
@@ -293,13 +293,12 @@ namespace AST {
         return PN;
     }
 
-    llvm::Value *WhileLoop::CodeGen(codegen::CodeGenContext &context)
-    {
+    llvm::Value *WhileLoop::CodeGen(codegen::CodeGenContext &context) {
         llvm::BasicBlock *condBB = llvm::BasicBlock::Create(context.llvmCtx, "condloop", context.mainFunction);
         llvm::BasicBlock *afterBB =
-            llvm::BasicBlock::Create(context.llvmCtx, "afterloop", context.mainFunction);
+                llvm::BasicBlock::Create(context.llvmCtx, "afterloop", context.mainFunction);
         llvm::BasicBlock *loopBB =
-            llvm::BasicBlock::Create(context.llvmCtx, "loop", context.mainFunction);
+                llvm::BasicBlock::Create(context.llvmCtx, "loop", context.mainFunction);
 
 
         context.builder->CreateBr(condBB);

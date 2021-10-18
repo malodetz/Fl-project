@@ -7,11 +7,20 @@
         "else {",
         "}"
       ],
-      "description": "css files for lf"
+      "description": "If statement with else branch"
     },
-    "React Bind Snippet": {
-      "prefix": "!bind",
-      "body": "this.${foo} = this.${foo}.bind(this)",
-      "description": "this binding for react"
+    "Infinite cycle Snippet": {
+      "prefix": "!inf",
+      "body": [ "while (True) {",
+      "}"
+      ],
+      "description": "Infinite cycle"
+    },
+    "Main function Snippet": {
+      "prefix": "!mn",
+      "body": [ "main() {",
+      "}"
+      ],
+      "description": "Main funcion"
     }
   }

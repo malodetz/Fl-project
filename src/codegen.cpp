@@ -293,26 +293,33 @@ namespace AST {
         return PN;
     }
 
-    llvm::Value *WhileLoop::CodeGen(codegen::CodeGenContext &context) {
-        llvm::BasicBlock *loopBB = llvm::BasicBlock::Create(context.llvmCtx, "loop", context.mainFunction);
-        context.builder->CreateBr(loopBB);
-        context.builder->SetInsertPoint(loopBB);
+    llvm::Value *WhileLoop::CodeGen(codegen::CodeGenContext &context)
+    {
+        llvm::BasicBlock *condBB = llvm::BasicBlock::Create(context.llvmCtx, "condloop", context.mainFunction);
+        llvm::BasicBlock *afterBB =
+            llvm::BasicBlock::Create(context.llvmCtx, "afterloop", context.mainFunction);
+        llvm::BasicBlock *loopBB =
+            llvm::BasicBlock::Create(context.llvmCtx, "loop", context.mainFunction);
 
-        auto *body_v = code_block.CodeGen(context);
-        assert(body_v);
+
+        context.builder->CreateBr(condBB);
+        context.builder->SetInsertPoint(condBB);
 
         auto *end_cond_v = expr.CodeGen(context);
         assert(end_cond_v);
-
         end_cond_v = context.builder->CreateICmpNE(
                 end_cond_v, context.builder->getInt1(false), "loopcond");
 
         assert(end_cond_v);
 
-        llvm::BasicBlock *afterBB =
-                llvm::BasicBlock::Create(context.llvmCtx, "afterloop", context.mainFunction);
-
         context.builder->CreateCondBr(end_cond_v, loopBB, afterBB);
+
+        context.builder->SetInsertPoint(loopBB);
+        auto *body_v = code_block.CodeGen(context);
+        assert(body_v);
+
+
+        context.builder->CreateBr(condBB);
 
         context.builder->SetInsertPoint(afterBB);
         return Skip{}.CodeGen(context);

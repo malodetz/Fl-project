@@ -344,7 +344,7 @@ namespace AST
         auto *end_cond_v = expr.CodeGen(context);
         assert(end_cond_v);
 
-        end_cond_v = context.builder->CreateICmpEQ(
+        end_cond_v = context.builder->CreateICmpNE(
             end_cond_v, context.builder->getInt1(false), "loopcond");
         assert(end_cond_v);
 

@@ -190,7 +190,7 @@ namespace AST
         CodeBlock on_if;
         std::optional<CodeBlock> on_else;
         IfStatement(Expression &expr_, CodeBlock on_if_, std::optional<CodeBlock> on_else_);
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
 }

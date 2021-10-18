@@ -1,5 +1,5 @@
 LLVMCONFIG = llvm-config
-CPPFLAGS = `$(LLVMCONFIG) --cppflags` -std=c++17
+CPPFLAGS = `$(LLVMCONFIG) --cppflags` -std=c++17 -O3
 LDFLAGS = `$(LLVMCONFIG) --ldflags` -lpthread -ldl -lz -lncurses -rdynamic
 LIBS = `$(LLVMCONFIG) --libs`
 

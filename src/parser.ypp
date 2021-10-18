@@ -85,7 +85,10 @@ codegen::CodeGenContext & codegenContext() {
 %type <else_stmt> optional_else;
 
 %%
-start: MAIN LP RP code_block  {cout << "Main: " << endl;}
+start: MAIN LP RP code_block  {
+    cout << "Main: " << endl;
+    codegenContext().astBlock = $4;
+}
 
 code_block: LB statements_seq RB {
     $$ = new AST::CodeBlock(parsingContext().GetBlockAndClear());
@@ -217,7 +220,7 @@ int main(int argc, char* argv[])
     yyparse();
     fclose(stdin);
 
-    codegenContext().astBlock = new AST::CodeBlock(parsingContext().GetBlockAndClear());
+    // codegenContext().astBlock = new AST::CodeBlock(parsingContext().GetBlockAndClear());
     codegenContext().generateCode();
     codegenContext().runCode();
 

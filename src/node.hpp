@@ -68,12 +68,10 @@ namespace AST
         Or
     };
 
-    // static StatementList CurCodeBlock;
-
     struct Node
     {
         virtual ~Node();
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context)
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) 
         {
             return nullptr;
         }
@@ -82,42 +80,20 @@ namespace AST
     struct Expression : Node
     {
         DataType type;
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
     };
-
-    // bool HasType(const Expression &e, DataType type);
-
-    // bool SameType(const Expression &lhs, const Expression &rhs);
 
     struct Statement : Node
     {
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
     };
 
     struct CodeBlock : Node
     {
         StatementList statements;
         CodeBlock(StatementList statements_);
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
-
-    // Kinds of expression
-
-    // DataType GetType(int val);
-    // DataType GetType(bool val);
-    // DataType GetType(std::string val);
-
-    // template <class LiteralType>
-    // struct Constant : Expression
-    // {
-    //     LiteralType val;
-    //     Constant(LiteralType val_) : val(val_)
-    //     {
-    //         type = details::GetType(val_);
-    //         std::cerr << "Constructed Constant: " << val_ << std::endl;
-    //     }
-    //     virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
-    // };
 
     struct ConstantInt : Expression
     {
@@ -127,10 +103,10 @@ namespace AST
             type = DataType::Int;
             std::cerr << "Constructed Constant: " << val_ << std::endl;
         }
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
-    struct ConstantString : Expression
+    struct ConstantString : Expression // TODO
     {
         std::string val;
         ConstantString(std::string val_) : val(val_)
@@ -138,7 +114,7 @@ namespace AST
             type = DataType::String;
             std::cerr << "Constructed Constant: " << val_ << std::endl;
         }
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
     };
 
     struct ConstantBool : Expression
@@ -149,16 +125,15 @@ namespace AST
             type = DataType::Bool;
             std::cerr << "Constructed Constant: " << val_ << std::endl;
         }
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
-
 
     // Gonna find value in context
     struct Identifier : public Expression
     {
         std::string name;
         Identifier(DataType type, std::string name_);
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
     struct UnaryOp : public Expression
@@ -166,7 +141,7 @@ namespace AST
         UnaryOpType op;
         Expression &expr;
         UnaryOp(UnaryOpType op_, Expression &expr_);
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
     };
 
     struct BinaryOp : public Expression
@@ -175,14 +150,14 @@ namespace AST
         Expression &lhs;
         Expression &rhs;
         BinaryOp(Expression &lhs_, BinaryOpType op_, Expression &rhs_);
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
     };
 
     // Kinds of statement
 
     struct Skip : Statement
     {
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override { return nullptr; }
     };
 
     struct VarDecl : Statement
@@ -190,7 +165,7 @@ namespace AST
         Identifier *ident;
         Expression &expr;
         VarDecl(Identifier *ident_, Expression &expr_);
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
     struct VarAssign : Statement
@@ -198,7 +173,7 @@ namespace AST
         Identifier *ident;
         Expression &expr;
         VarAssign(Identifier *ident_, Expression &expr_);
-        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) { return nullptr; }
+        virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
     };
 
     struct WhileLoop : Statement

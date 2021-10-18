@@ -323,7 +323,7 @@ namespace AST
             std::cout << "Generated else! " << intptr_t(elseGen) << std::endl;
         }
         else {
-            std::cout << "Outside of on_else" << std::endl;
+            elseGen = AST::Skip{}.CodeGen(context);
         }
         std::cout << "B4 assert: " << intptr_t(elseGen) << std::endl;
         assert(elseGen);
@@ -336,10 +336,6 @@ namespace AST
         context.builder->SetInsertPoint(mergeBB);
         llvm::PHINode *PN = context.builder->CreatePHI(context.builder->getInt1Ty(), 2, "iftmp");
 
-        assert(thenGen);
-        assert(elseGen);
-        assert(thenBB);
-        assert(elseBB);
 
         PN->addIncoming(thenGen, thenBB);
         PN->addIncoming(elseGen, elseBB);

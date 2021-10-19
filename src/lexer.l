@@ -7,6 +7,8 @@
 #include "node.hpp"
 #include "parser.hpp"
 
+#include <iostream>
+
 int string_pos = 1;
 
 int check_int(){
@@ -69,6 +71,7 @@ GE ">="
 NOT "!"
 AND "&&"
 OR "||"
+PRINT "print"
 
 %%
 
@@ -77,6 +80,7 @@ OR "||"
 {ELSE}          {check_and_set_string(); string_pos+=strlen(yytext); return ELSE; }
 {WHILE}         {check_and_set_string(); string_pos+=strlen(yytext); return WHILE; }
 {SKIP}          {check_and_set_string(); string_pos+=strlen(yytext); return SKIP;}
+{PRINT}         {check_and_set_string(); string_pos+=strlen(yytext); std::cout << "LEXED PRINT" << std::endl; return PRINT;}
 {INT_TYPE}      {check_and_set_string(); string_pos+=strlen(yytext); return INT_TYPE; }
 {BOOL_TYPE}     {check_and_set_string(); string_pos+=strlen(yytext); return BOOL_TYPE; }
 {STRING_TYPE}   {check_and_set_string(); string_pos+=strlen(yytext); return STRING_TYPE; }
@@ -106,6 +110,7 @@ OR "||"
 {NOT}           {check_and_set_string(); string_pos+=strlen(yytext); return NOT; }
 {AND}           {check_and_set_string(); string_pos+=strlen(yytext); return AND; }
 {OR}            {check_and_set_string(); string_pos+=strlen(yytext); return OR; }
+
 
 {COMMENT}       {string_pos+=strlen(yytext);}
 [ \t\r]         {string_pos++;}

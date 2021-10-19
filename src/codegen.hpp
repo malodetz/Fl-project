@@ -24,6 +24,13 @@ namespace codegen {
         llvm::Function *mainFunction = nullptr;
         AST::CodeBlock *astBlock = nullptr; // ast is here
 
+        llvm::BasicBlock *printBlock = nullptr;
+
+        llvm::Value *fmtInt = nullptr;
+        llvm::Value *fmtStr = nullptr;
+        llvm::FunctionCallee printfCallee;
+
+        llvm::Function * printfF;
 
         CodeGenContext();
 

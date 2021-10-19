@@ -121,13 +121,13 @@ namespace AST {
     llvm::Value *ConstantString::CodeGen(codegen::CodeGenContext &context) {
         std::cout << "Generating constant string...\n";
 
-//        static GlobalStringPool globs;
-//        auto iter = globs.find(val);
-//        if (iter == globs.end()) {
-//            iter = globs.emplace(val, context.builder->CreateGlobalString(val)).first;
-//        }
+        static GlobalStringPool globs;
+        auto iter = globs.find(val);
+        if (iter == globs.end()) {
+            iter = globs.emplace(val, context.builder->CreateGlobalStringPtr(llvm::StringRef(val))).first;
+        }
 
-        return context.builder->CreateGlobalStringPtr(llvm::StringRef(val));;
+        return iter->second;
     }
 
     llvm::Value *Identifier::CodeGen(codegen::CodeGenContext &context) {

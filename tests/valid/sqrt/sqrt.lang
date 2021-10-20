@@ -1,0 +1,14 @@
+main() {
+    Int val = 144;
+    Int x = 0;
+    while (x * x < val) {
+        x = x + 1;
+    }
+    if (x * x == val) {
+        print "Precise square root of val = ";
+        print x;
+    }
+    else {
+        print "Sqrt is not integer!";
+    }
+}

@@ -1,0 +1,21 @@
+main started
+main() {
+    Int a = 0b1111;
+    while (a > 0) {
+ Code Block Started
+Code block start position = 0
+Constructed Constant: 15
+Identifier a created
+[Variables] <--- a
+id = 94611315323168
+Before access
+---Stack size = 1---
+While block started
+Looking for variable: a
+Constructed Constant: 0
+Code Block Started
+Code block start position = 1
+       // Empty codeblock (skip operator expected)
+    }
+}If block started
+Error! syntax error

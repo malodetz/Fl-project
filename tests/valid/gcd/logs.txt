@@ -1,0 +1,179 @@
+main started
+Code Block Started
+Code block start position = 0
+Constructed Constant: 30
+Identifier x created
+[Variables] <--- x
+id = 93932493046064
+Before access
+---Stack size = 1---
+Constructed Constant: 24
+Identifier y created
+[Variables] <--- y
+id = 93932493047600
+Before access
+---Stack size = 2---
+While block started
+Looking for variable: x
+Constructed Constant: 0
+Code Block Started
+Code block start position = 2
+If block started
+Looking for variable: y
+Looking for variable: x
+Code Block Started
+Code block start position = 2
+Looking for variable: y
+Identifier tmp created
+[Variables] <--- tmp
+id = 93932493048320
+Before access
+---Stack size = 3---
+Looking for variable: x
+y assigned
+---Stack size = 4---
+Looking for variable: tmp
+x assigned
+---Stack size = 5---
+CodeBlock successfully packed: size = 3
+_____CodeBlock created_____
+If statement created
+---Stack size = 3---
+Looking for variable: y
+Looking for variable: x
+y assigned
+---Stack size = 4---
+CodeBlock successfully packed: size = 2
+_____CodeBlock created_____
+While cycle created
+---Stack size = 3---
+LEXED PRINT
+Looking for variable: y
+print_statement 211
+PrintStatement done
+Statement | print_statement
+---Stack size = 4---
+CodeBlock successfully packed: size = 4
+_____CodeBlock created_____
+Main: 
+Start generating code...
+AST block size = 4
+Generating block...
+1 statement:
+Generating declaration for x...
+Generating Ident with name "x"...
+x assigned
+Generating assignment for x...
+Generating constant i32...
+Extracting x...
+Int!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+2 statement:
+Generating declaration for y...
+Generating Ident with name "y"...
+y assigned
+Generating assignment for y...
+Generating constant i32...
+Extracting y...
+Int!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+3 statement:
+Generating binary op...
+Extracting x...
+Generating constant i32...
+Generating block...
+1 statement:
+Generating binary op...
+Extracting y...
+Extracting x...
+Generating block...
+1 statement:
+Generating declaration for tmp...
+Generating Ident with name "tmp"...
+tmp assigned
+Generating assignment for tmp...
+Extracting y...
+Extracting tmp...
+Int!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+2 statement:
+Generating assignment for y...
+Extracting x...
+Extracting y...
+Int!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+3 statement:
+Generating assignment for x...
+Extracting tmp...
+Extracting x...
+Int!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+B4 assert: 93932493072176
+2 statement:
+Generating assignment for y...
+Generating binary op...
+Extracting y...
+Extracting x...
+Extracting y...
+Int!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+4 statement:
+Inside PrintStatement codegen
+Extracting y...
+value to be printed is calculated
+; ModuleID = 'main'
+source_filename = "main"
+
+@fmtInt = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@fmtStr = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
+
+define i32 @main() {
+entry:
+  %x = alloca i32, align 4
+  store i32 30, i32* %x, align 4
+  %0 = load i32, i32* %x, align 4
+  %y = alloca i32, align 4
+  store i32 24, i32* %y, align 4
+  %1 = load i32, i32* %y, align 4
+  br label %condloop
+
+condloop:                                         ; preds = %merge, %entry
+  %2 = load i32, i32* %x, align 4
+  %3 = icmp ne i32 %2, 0
+  %loopcond = icmp ne i1 %3, false
+  br i1 %loopcond, label %loop, label %afterloop
+
+afterloop:                                        ; preds = %condloop
+  %4 = load i32, i32* %y, align 4
+  %print = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @fmtInt, i32 0, i32 0), i32 %4)
+  ret i32 0
+
+loop:                                             ; preds = %condloop
+  %5 = load i32, i32* %y, align 4
+  %6 = load i32, i32* %x, align 4
+  %7 = icmp slt i32 %5, %6
+  %ifcond = icmp eq i1 %7, true
+  br i1 %ifcond, label %then, label %else
+
+then:                                             ; preds = %loop
+  %tmp = alloca i32, align 4
+  %8 = load i32, i32* %y, align 4
+  store i32 %8, i32* %tmp, align 4
+  %9 = load i32, i32* %tmp, align 4
+  %10 = load i32, i32* %x, align 4
+  store i32 %10, i32* %y, align 4
+  %11 = load i32, i32* %y, align 4
+  %12 = load i32, i32* %tmp, align 4
+  store i32 %12, i32* %x, align 4
+  %13 = load i32, i32* %x, align 4
+  br label %merge
+
+else:                                             ; preds = %loop
+  br label %merge
+
+merge:                                            ; preds = %else, %then
+  %iftmp = phi i1 [ true, %then ], [ true, %else ]
+  %14 = load i32, i32* %y, align 4
+  %15 = load i32, i32* %x, align 4
+  %16 = sub i32 %14, %15
+  store i32 %16, i32* %y, align 4
+  %17 = load i32, i32* %y, align 4
+  br label %condloop
+}
+
+declare i32 @printf(i8*, ...)
+Code generated..

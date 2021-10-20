@@ -1,0 +1,7 @@
+main() {
+    Int z = 0;
+    Bool b = True;
+    while (z < 5) {
+        z = b; // Binary Operation with worng types
+    }
+}

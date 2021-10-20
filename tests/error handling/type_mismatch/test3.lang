@@ -1,0 +1,8 @@
+main() {
+    String a = "hello";
+    Int x = 0;
+    while (x == 0) {
+        x = x + 1;l
+        String s = a || x; // Trying to store bool exression in String variable
+    }
+}

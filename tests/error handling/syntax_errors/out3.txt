@@ -1,0 +1,16 @@
+main started
+Code Block Started
+Code block start position = 0
+Constructed Constant: 5
+Identifier x created
+[Variables] <--- x
+id = 94058725577008
+Before access
+---Stack size = 1---
+Constructed Constant: "hello world"
+Identifier y created
+[Variables] <--- y
+id = 94058725578624
+Before access
+---Stack size = 2---
+Error! syntax error

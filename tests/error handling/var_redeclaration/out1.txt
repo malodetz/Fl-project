@@ -1,0 +1,55 @@
+main started
+main() {
+    Int x = 10;
+    Bool flag = True;
+   Code Block Started
+Code block start position = 0
+Constructed Constant: 10
+Identifier x created
+[Variables] <--- x
+id = 94266218430752
+Before access
+---Stack size = 1---
+Constructed Constant: 1
+Identifier flag created
+[Variables] <--- flag
+id = 94266218433328
+Before access
+---Stack size = 2---
+ while (flag) {
+        if (x == 15) {
+           While block started
+Looking for variable: flag
+Code Block Started
+Code block start position = 2
+If block started
+Looking for variable: x
+Constructed Constant: 15
+Code Block Started
+Code block start position = 2
+ flag = False;
+        } 
+        x = x + 1;
+    }Constructed Constant: 0
+flag assigned
+---Stack size = 3---
+CodeBlock successfully packed: size = 1
+_____CodeBlock created_____
+If statement created
+---Stack size = 3---
+Looking for variable: x
+Constructed Constant: 1
+expr + expr << 
+x assigned
+---Stack size = 4---
+
+    Int x = 100;
+}CodeBlock successfully packed: size = 2
+_____CodeBlock created_____
+While cycle created
+---Stack size = 3---
+Constructed Constant: 100
+Identifier x created
+[Variables] <--- x
+id = 94266218434640
+[Internal error] Trying to store an already storead value!

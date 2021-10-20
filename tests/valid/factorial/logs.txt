@@ -1,0 +1,125 @@
+main started
+Code Block Started
+Code block start position = 0
+Constructed Constant: 12
+Identifier x created
+[Variables] <--- x
+id = 94266364191024
+Before access
+---Stack size = 1---
+Constructed Constant: 1
+Identifier ans created
+[Variables] <--- ans
+id = 94266364192560
+Before access
+---Stack size = 2---
+While block started
+Looking for variable: x
+Constructed Constant: 0
+Code Block Started
+Code block start position = 2
+Looking for variable: ans
+Looking for variable: x
+ans assigned
+---Stack size = 3---
+Looking for variable: x
+Constructed Constant: 1
+x assigned
+---Stack size = 4---
+CodeBlock successfully packed: size = 2
+_____CodeBlock created_____
+While cycle created
+---Stack size = 3---
+LEXED PRINT
+Looking for variable: ans
+print_statement 211
+PrintStatement done
+Statement | print_statement
+---Stack size = 4---
+CodeBlock successfully packed: size = 4
+_____CodeBlock created_____
+Main: 
+Start generating code...
+AST block size = 4
+Generating block...
+1 statement:
+Generating declaration for x...
+Generating Ident with name "x"...
+x assigned
+Generating assignment for x...
+Generating constant i32...
+Extracting x...
+Int!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+2 statement:
+Generating declaration for ans...
+Generating Ident with name "ans"...
+ans assigned
+Generating assignment for ans...
+Generating constant i32...
+Extracting ans...
+Int!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+3 statement:
+Generating binary op...
+Extracting x...
+Generating constant i32...
+Generating block...
+1 statement:
+Generating assignment for ans...
+Generating binary op...
+Extracting ans...
+Extracting x...
+Extracting ans...
+Int!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+2 statement:
+Generating assignment for x...
+Generating binary op...
+Extracting x...
+Generating constant i32...
+Extracting x...
+Int!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+4 statement:
+Inside PrintStatement codegen
+Extracting ans...
+value to be printed is calculated
+; ModuleID = 'main'
+source_filename = "main"
+
+@fmtInt = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@fmtStr = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
+
+define i32 @main() {
+entry:
+  %x = alloca i32, align 4
+  store i32 12, i32* %x, align 4
+  %0 = load i32, i32* %x, align 4
+  %ans = alloca i32, align 4
+  store i32 1, i32* %ans, align 4
+  %1 = load i32, i32* %ans, align 4
+  br label %condloop
+
+condloop:                                         ; preds = %loop, %entry
+  %2 = load i32, i32* %x, align 4
+  %3 = icmp ne i32 %2, 0
+  %loopcond = icmp ne i1 %3, false
+  br i1 %loopcond, label %loop, label %afterloop
+
+afterloop:                                        ; preds = %condloop
+  %4 = load i32, i32* %ans, align 4
+  %print = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @fmtInt, i32 0, i32 0), i32 %4)
+  ret i32 0
+
+loop:                                             ; preds = %condloop
+  %5 = load i32, i32* %ans, align 4
+  %6 = load i32, i32* %x, align 4
+  %7 = mul i32 %5, %6
+  store i32 %7, i32* %ans, align 4
+  %8 = load i32, i32* %ans, align 4
+  %9 = load i32, i32* %x, align 4
+  %10 = sub i32 %9, 1
+  store i32 %10, i32* %x, align 4
+  %11 = load i32, i32* %x, align 4
+  br label %condloop
+}
+
+declare i32 @printf(i8*, ...)
+Code generated..

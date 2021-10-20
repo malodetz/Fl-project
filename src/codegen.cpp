@@ -43,7 +43,7 @@ namespace codegen
         builder->SetInsertPoint(basicBlock);
 
         fmtInt = builder->CreateGlobalStringPtr("%d\n", "fmtInt"); // fmt for int
-        fmtStr =  builder->CreateGlobalStringPtr("%s\n", "fmtStr");
+        fmtStr = builder->CreateGlobalStringPtr("%s\n", "fmtStr");
         // creating printIntF
 
         // llvm::FunctionType * printFunctionType = llvm::FunctionType::get(builder->getInt32Ty(), false);
@@ -98,20 +98,11 @@ namespace codegen
         return {};
     }
 
-    void CodeGenContext::saveCode(bool isBinary) const
+    void CodeGenContext::saveCode(const std::string &output_fname) const
     {
-        if (isBinary)
-        {
-            std::ofstream bit_file("lol.bc", std::ios_base::binary);
-            llvm::raw_os_ostream bit_write(bit_file);
-            WriteBitcodeToFile(*module, bit_write);
-        }
-        else
-        {
-            std::ofstream text_file("lol.ll", std::ios_base::out);
-            llvm::raw_os_ostream text_write(text_file);
-            module->print(text_write, nullptr);
-        }
+        std::ofstream text_file(output_fname + ".ll", std::ios_base::out);
+        llvm::raw_os_ostream text_write(text_file);
+        module->print(text_write, nullptr);
     }
 
 }
@@ -427,10 +418,12 @@ namespace AST
         std::cerr << "value to be printed is calculated" << std::endl;
         assert(v);
         std::vector<llvm::Value *> args;
-        if (e->type == DataType::String) {
+        if (e->type == DataType::String)
+        {
             args.push_back(context.fmtStr);
         }
-        else {
+        else
+        {
             args.push_back(context.fmtInt);
         }
         args.push_back(v);

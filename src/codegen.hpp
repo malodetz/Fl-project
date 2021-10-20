@@ -36,7 +36,7 @@ namespace codegen {
 
         void generateCode();
 
-        void saveCode(bool isBinary = false) const;
+        void saveCode(const std::string & output_fname) const;
 
         llvm::GenericValue runCode() const;
     };

@@ -1,8 +1,5 @@
 main started
-main() {
-    Int f = 100;
-    if f > 5 {
-        pCode Block Started
+Code Block Started
 Code block start position = 0
 Constructed Constant: 100
 Identifier f created

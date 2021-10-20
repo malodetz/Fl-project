@@ -62,14 +62,14 @@ namespace AST {
 
     Identifier::Identifier(DataType type_, std::string name_) : name(std::move(name_)) {
         type = std::move(type_);
-        std::cerr << "Identifier " << name << " created" << '\n';
+        std::cout << "Identifier " << name << " created" << '\n';
 
         // Variables[name] = this;
-        std::cerr << "[Variables] <--- " << name << std::endl;
+        std::cout << "[Variables] <--- " << name << std::endl;
     }
 
     CodeBlock::CodeBlock(StatementList statements_) : statements(std::move(statements_)) {
-        std::cerr << "_____CodeBlock created_____" << std::endl;
+        std::cout << "_____CodeBlock created_____" << std::endl;
     }
 
     UnaryOp::UnaryOp(UnaryOpType op_, Expression &expr_) : op(op_), expr(expr_) {
@@ -133,7 +133,7 @@ namespace AST {
                 break;
             }
             default:
-                std::cerr << "Unknown BinOp\n";
+                std::cout << "Unknown BinOp\n";
         }
 
         // calculating result type
@@ -180,7 +180,7 @@ namespace AST {
         if (!details::SameType(*ident, expr)) {
             throw std::runtime_error("Mismatched typed in VarAssign");
         }
-        std::cerr << ident->name << " assigned" << std::endl;
+        std::cout << ident->name << " assigned" << std::endl;
     }
 
     WhileLoop::WhileLoop(Expression &expr_, CodeBlock code_block_) : expr(expr_),
@@ -188,7 +188,7 @@ namespace AST {
         if (!details::HasType(expr, DataType::Bool)) {
             throw std::runtime_error("Non-bool expr in WhileLoop");
         }
-        std::cerr << "While cycle created" << std::endl;
+        std::cout << "While cycle created" << std::endl;
     }
 
     IfStatement::IfStatement(Expression &expr_, CodeBlock on_if_, std::optional<CodeBlock> on_else_) : expr(expr_),
@@ -199,6 +199,6 @@ namespace AST {
         if (!details::HasType(expr, DataType::Bool)) {
             throw std::runtime_error("Non-bool expr in WhileLoop");
         }
-        std::cerr << "If statement created" << std::endl;
+        std::cout << "If statement created" << std::endl;
     }
 }

@@ -358,9 +358,9 @@ namespace AST {
     }
 
     llvm::Value *PrintStatement::CodeGen(codegen::CodeGenContext &context) {
-        std::cerr << "Inside PrintStatement codegen" << std::endl;
+        std::cout << "Inside PrintStatement codegen" << std::endl;
         auto *v = e->CodeGen(context);
-        std::cerr << "value to be printed is calculated" << std::endl;
+        std::cout << "value to be printed is calculated" << std::endl;
         assert(v);
         std::vector<llvm::Value *> args;
         if (e->type == DataType::String) {

@@ -106,7 +106,7 @@ namespace AST {
 
         ConstantInt(int val_) : val(val_) {
             type = DataType::Int;
-            std::cerr << "Constructed Constant: " << val_ << std::endl;
+            std::cout << "Constructed Constant: " << val_ << std::endl;
         }
 
         virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
@@ -117,7 +117,7 @@ namespace AST {
 
         ConstantString(std::string val_) : val(val_) {
             type = DataType::String;
-            std::cerr << "Constructed Constant: " << val_ << std::endl;
+            std::cout << "Constructed Constant: " << val_ << std::endl;
         }
 
         virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
@@ -128,7 +128,7 @@ namespace AST {
 
         ConstantBool(bool val_) : val(val_) {
             type = DataType::Bool;
-            std::cerr << "Constructed Constant: " << val_ << std::endl;
+            std::cout << "Constructed Constant: " << val_ << std::endl;
         }
 
         virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;
@@ -209,7 +209,7 @@ namespace AST {
         Expression *e;
 
         PrintStatement(Expression *e_) : e(e_) {
-            std::cerr << "PrintStatement done\n";
+            std::cout << "PrintStatement done\n";
         }
 
         virtual llvm::Value *CodeGen(codegen::CodeGenContext &context) override;

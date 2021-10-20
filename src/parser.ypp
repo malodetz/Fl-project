@@ -52,6 +52,7 @@ codegen::CodeGenContext & codegenContext() {
     AST::Statement *statement;
     AST::Skip *skip;
     AST::IfStatement *if_stmt;
+    AST::PrintStatement* print_stmt;
     std::optional<AST::CodeBlock> *else_stmt;
 }
 
@@ -61,7 +62,7 @@ codegen::CodeGenContext & codegenContext() {
 %token <word> STRING
 %token <sym> SEP LP RP LB RB ASSIGN
 %token <sym> PLUS MINUS MUL DIV POW
-%token <word> EQ NEQ LT LE GT GE NOT AND OR
+%token <word> EQ NEQ LT LE GT GE NOT AND OR PRINT
 %token <num> INT
 %token <boolean> TRUE_VAL FALSE_VAL
 
@@ -84,6 +85,7 @@ codegen::CodeGenContext & codegenContext() {
 %type <skip> skip;
 %type <if_stmt> if_statement;
 %type <else_stmt> optional_else;
+%type <print_stmt> print_statement;
 
 %%
 start: main_debug MAIN LP RP code_block  {
@@ -151,6 +153,13 @@ statement: declaration {
     std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
     // parsingContext().AddStatement($1);
 }
+| print_statement {
+    std::cerr << "Statement | print_statement" << std::endl;
+    AST::Statement *st = dynamic_cast<AST::Statement *>($1);
+    assert(st);
+    AST::StackOfStatements().push(st);
+    std::cerr << "---Stack size = " << AST::StackOfStatements().size() << "---\n";
+}
 ;
 
 skip: SKIP SEP {
@@ -198,6 +207,14 @@ while_statement: while_deb WHILE LP EXPR RP code_block {
     // $$ = new AST::WhileLoop(*$3, *$5);
     $$ = new AST::WhileLoop(*$4, *$6);
 };
+
+print_statement: PRINT EXPR SEP {
+    std::cout << "print_statement 211" << std::endl;
+    $$ = new AST::PrintStatement($2);
+    if ($$ == nullptr) {
+        throw std::runtime_error("Parsing error [print]");
+    }
+}
 
 while_deb: {std::cerr << "While block started\n"; }
 
@@ -272,28 +289,29 @@ CONST: INT { $$ = new AST::ConstantInt($1); }
 int main(int argc, char* argv[])
 {
     try {
-        freopen(argv[1], "r", stdin);
+        // freopen(argv[1], "r", stdin);
         yyparse();
-        fclose(stdin);
+        // fclose(stdin);
     } catch(std::exception & e) {
         std::cout << e.what() << '\n';
         return 1;
     }
 
     codegenContext().generateCode();
+    codegenContext().saveCode(argv[1]);
 
-    if (argc > 2){
-        if (std::string(argv[2]) == "--code"){
-            codegenContext().saveCode();
-        } else if (std::string(argv[2]) == "--bin"){
-            codegenContext().saveCode(true);
-        } else if (std::string(argv[2]) == "--exec"){
-            codegenContext().runCode();
-        } else{
-            std::cerr << "Unknow key: " << argv[2] << std::endl;
-            return 1;
-        }
-    }
+    // if (argc > 2){
+    //     if (std::string(argv[2]) == "--code"){
+    //         codegenContext().saveCode();
+    //     } else if (std::string(argv[2]) == "--bin"){
+            
+    //     } else if (std::string(argv[2]) == "--exec"){
+    //         // codegenContext().runCode();
+    //     } else{
+    //         std::cerr << "Unknow key: " << argv[2] << std::endl;
+    //         return 1;
+    //     }
+    // }
 
     return 0;
 }

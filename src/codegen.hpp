@@ -24,12 +24,19 @@ namespace codegen {
         llvm::Function *mainFunction = nullptr;
         AST::CodeBlock *astBlock = nullptr; // ast is here
 
+        llvm::BasicBlock *printBlock = nullptr;
+
+        llvm::Value *fmtInt = nullptr;
+        llvm::Value *fmtStr = nullptr;
+        llvm::FunctionCallee printfCallee;
+
+        llvm::Function * printfF;
 
         CodeGenContext();
 
         void generateCode();
 
-        void saveCode(bool isBinary = false) const;
+        void saveCode(const std::string & output_fname) const;
 
         llvm::GenericValue runCode() const;
     };

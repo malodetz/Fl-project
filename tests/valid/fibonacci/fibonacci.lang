@@ -1,0 +1,15 @@
+main() {
+    Int pos = 9; // Finding 6th fib number
+    Int x = 0;
+    Int y = 1;
+    Int curPos = 1;
+    while (curPos != pos) {
+        Int next = x + y;
+        x = y;
+        y = next;
+        curPos = curPos + 1;
+    }
+    print y;
+}
+
+// 0 1 1 2 3 5 8 13 21 34

@@ -1,0 +1,6 @@
+main() {
+    Bool x = (5 > 10) || (6 / 3 == 2);
+    if (x) {
+        String x = "Hello"; // Trying to redeclarate x variable as a different kind of symbol
+    } 
+}

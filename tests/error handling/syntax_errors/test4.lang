@@ -1,0 +1,12 @@
+main() {
+    Int x = 56;
+    if (x > 100) {
+        print "Large";
+    }
+    else {
+        print "Small";
+    }
+    else { // Single else syntax error
+        print "wtf?!";
+    }
+}

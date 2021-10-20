@@ -1,0 +1,53 @@
+main() {
+    Int x = 37;
+    if (0 <= x && x <= 100) {
+        if (x <= 50) {
+            if (x <= 25) {
+                while (x > 2) {
+                    x = x - 2;
+                }
+                if (x == 1) {
+                    print "odd number in first quarter";
+                }
+                else {
+                    print "even number in first quarter";
+                }
+            }
+            else {
+                while (x > 2) {
+                    x = x - 2;
+                }
+                if (x == 1) {
+                    print "odd number in second quarter";
+                }
+                else {
+                    print "even number in second quarter";
+                }
+            }
+        }
+        else {
+            if (x <= 75) {
+                while (x > 2) {
+                    x = x - 2;
+                }
+                if (x == 1) {
+                    print "odd number in third quarter";
+                }
+                else {
+                    print "even number in third quarter";
+                }
+            }
+            else {
+                while (x > 2) {
+                    x = x - 2;
+                }
+                if (x == 1) {
+                    print "odd number in forth quarter";
+                }
+                else {
+                    print "even number in forth quarter";
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,28 @@
+main started
+main() {
+    Int z = 0;
+    Bool b = True;
+    whiCode Block Started
+Code block start position = 0
+Constructed Constant: 0
+Identifier z created
+[Variables] <--- z
+id = 94574358454560
+Before access
+---Stack size = 1---
+Constructed Constant: 1
+Identifier b created
+[Variables] <--- b
+id = 94574358457136
+Before access
+---Stack size = 2---
+le (z < 5) {
+        z = b;
+    }
+}While block started
+Looking for variable: z
+Constructed Constant: 5
+Code Block Started
+Code block start position = 2
+Looking for variable: b
+Mismatched typed in VarAssign

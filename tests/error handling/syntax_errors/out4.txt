@@ -1,0 +1,37 @@
+main started
+Code Block Started
+Code block start position = 0
+Constructed Constant: 56
+Identifier x created
+[Variables] <--- x
+id = 94362072805680
+Before access
+---Stack size = 1---
+If block started
+Looking for variable: x
+Constructed Constant: 100
+Code Block Started
+Code block start position = 1
+LEXED PRINT
+Constructed Constant: "Large"
+print_statement 211
+PrintStatement done
+Statement | print_statement
+---Stack size = 2---
+CodeBlock successfully packed: size = 1
+_____CodeBlock created_____
+Else block started
+Code Block Started
+Code block start position = 1
+LEXED PRINT
+Constructed Constant: "Small"
+print_statement 211
+PrintStatement done
+Statement | print_statement
+---Stack size = 2---
+CodeBlock successfully packed: size = 1
+_____CodeBlock created_____
+If statement created
+---Stack size = 2---
+If block started
+Error! syntax error

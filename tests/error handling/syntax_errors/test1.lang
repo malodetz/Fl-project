@@ -1,0 +1,6 @@
+main() {
+    Int f = 100;
+    if f > 5 { // prediacte is not inside paranthesis
+        print "f is large";
+    }
+}

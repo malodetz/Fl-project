@@ -1,0 +1,14 @@
+main() {
+    Int x = 30;
+    Int y = 24;
+    while (x != 0) {
+        if (y < x) {
+            Int tmp = y;
+            y = x;
+            x = tmp;
+        }
+        // y >= x
+        y = y - x; 
+    }
+    print y;
+}

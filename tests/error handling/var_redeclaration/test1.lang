@@ -1,0 +1,11 @@
+main() {
+    Int x = 10;
+    Bool flag = True;
+    while (flag) {
+        if (x == 15) {
+            flag = False;
+        } 
+        x = x + 1;
+    }
+    Int x = 100; // trying to redeclarate x variable
+}

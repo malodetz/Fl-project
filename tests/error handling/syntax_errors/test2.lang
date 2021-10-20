@@ -1,0 +1,6 @@
+main() {
+    Int a = 0b1111;
+    while (a > 0) {
+        // Empty codeblock (skip operator expected)
+    }
+}

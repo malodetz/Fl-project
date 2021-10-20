@@ -1,0 +1,7 @@
+main() {
+    Int x = 5;
+    Int y = 7;
+    while (x + y) { // Not boolean predicate
+        skip;
+    }
+}

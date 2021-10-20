@@ -1,0 +1,27 @@
+main started
+main() {
+    Bool x = (5 > 10) || (6 / 3 == 2);
+  Code Block Started
+Code block start position = 0
+Constructed Constant: 5
+Constructed Constant: 10
+Constructed Constant: 6
+Constructed Constant: 3
+Constructed Constant: 2
+Identifier x created
+[Variables] <--- x
+id = 94480230245104
+Before access
+---Stack size = 1---
+  if (x) {
+        String x = "Hello";
+    } 
+}If block started
+Looking for variable: x
+Code Block Started
+Code block start position = 1
+Constructed Constant: "Hello"
+Identifier x created
+[Variables] <--- x
+id = 94480230247856
+[Internal error] Trying to store an already storead value!

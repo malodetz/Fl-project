@@ -30,13 +30,13 @@ namespace codegen {
         llvm::Value *fmtStr = nullptr;
         llvm::FunctionCallee printfCallee;
 
-        llvm::Function * printfF;
+        llvm::Function *printfF;
 
         CodeGenContext();
 
         void generateCode();
 
-        void saveCode(const std::string & output_fname) const;
+        void saveCode(const std::string &output_fname) const;
 
         llvm::GenericValue runCode() const;
     };

@@ -286,32 +286,23 @@ CONST: INT { $$ = new AST::ConstantInt($1); }
 %%
 
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]){
+    assert(argc > 2);
     try {
-        // freopen(argv[1], "r", stdin);
+        freopen(argv[1], "r", stdin);
         yyparse();
-        // fclose(stdin);
+        fclose(stdin);
     } catch(std::exception & e) {
         std::cout << e.what() << '\n';
         return 1;
     }
 
     codegenContext().generateCode();
-    codegenContext().saveCode(argv[1]);
+    codegenContext().saveCode(argv[2]);
 
-    // if (argc > 2){
-    //     if (std::string(argv[2]) == "--code"){
-    //         codegenContext().saveCode();
-    //     } else if (std::string(argv[2]) == "--bin"){
-            
-    //     } else if (std::string(argv[2]) == "--exec"){
-    //         // codegenContext().runCode();
-    //     } else{
-    //         std::cerr << "Unknow key: " << argv[2] << std::endl;
-    //         return 1;
-    //     }
-    // }
+    if (argc == 4 && std::string(argv[3])=="--exec"){
+        codegenContext().runCode();
+    }
 
     return 0;
 }

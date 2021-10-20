@@ -1,28 +1,19 @@
 main started
-main() {
-    Int x = 5;
-    Int y = 7;
-    while (Code Block Started
+Code Block Started
 Code block start position = 0
 Constructed Constant: 5
 Identifier x created
 [Variables] <--- x
-id = 94696319832352
 Before access
 ---Stack size = 1---
 Constructed Constant: 7
 Identifier y created
 [Variables] <--- y
-id = 94696319834928
 Before access
 ---Stack size = 2---
-x + y) {
-        skip;
-    }
-}While block started
+While block started
 Looking for variable: x
 Looking for variable: y
-expr + expr << 
 Code Block Started
 Code block start position = 2
 ---Stack size = 3---

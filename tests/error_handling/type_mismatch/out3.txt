@@ -1,35 +1,23 @@
 main started
-main() {
-    String a = "hello";
-    Int x = 0;
-  Code Block Started
+Code Block Started
 Code block start position = 0
 Constructed Constant: "hello"
 Identifier a created
 [Variables] <--- a
-id = 94428199002480
 Before access
 ---Stack size = 1---
 Constructed Constant: 0
 Identifier x created
 [Variables] <--- x
-id = 94428199005008
 Before access
 ---Stack size = 2---
-  while (x == 0) {
-        x = x + 1;
-        StriWhile block started
+While block started
 Looking for variable: x
 Constructed Constant: 0
 Code Block Started
 Code block start position = 2
 Looking for variable: x
 Constructed Constant: 1
-expr + expr << 
 x assigned
 ---Stack size = 3---
-ng s = a || x;
-    }
-}Looking for variable: a
-Looking for variable: x
-BinOp with wrong types
+Error! syntax error

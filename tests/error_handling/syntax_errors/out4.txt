@@ -4,7 +4,6 @@ Code block start position = 0
 Constructed Constant: 56
 Identifier x created
 [Variables] <--- x
-id = 94362072805680
 Before access
 ---Stack size = 1---
 If block started
@@ -14,7 +13,6 @@ Code Block Started
 Code block start position = 1
 LEXED PRINT
 Constructed Constant: "Large"
-print_statement 211
 PrintStatement done
 Statement | print_statement
 ---Stack size = 2---
@@ -25,7 +23,6 @@ Code Block Started
 Code block start position = 1
 LEXED PRINT
 Constructed Constant: "Small"
-print_statement 211
 PrintStatement done
 Statement | print_statement
 ---Stack size = 2---

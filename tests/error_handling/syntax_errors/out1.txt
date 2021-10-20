@@ -4,7 +4,6 @@ Code block start position = 0
 Constructed Constant: 100
 Identifier f created
 [Variables] <--- f
-id = 93866621395232
 Before access
 ---Stack size = 1---
 If block started

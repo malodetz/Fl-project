@@ -168,7 +168,6 @@ skip: SKIP SEP {
 
 declaration: type VAR ASSIGN EXPR SEP {
     AST::Identifier *id = new AST::Identifier($1, *$2); delete $2;
-    std::cout << "id = " << intptr_t(id) << '\n';
     parsingContext().storeIdent(id->name, id);
     $$ = new AST::VarDecl(id, *$4);
 
